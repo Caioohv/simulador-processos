@@ -1,8 +1,10 @@
 class Processo {
-  constructor(pid, nome, duracao) {
+  constructor(pid, nome,ingresso, duracao, prioridade) {
     this.pid = pid;
+    this.prioridade = prioridade;
     this.nome = nome;
     this.duracao = duracao;
+    this.ingresso = ingresso;
   }
 
   executar(duracao) {
@@ -33,8 +35,16 @@ class Processo {
     return this.nome;
   }
 
+  getIngresso(){
+    return this.ingresso;
+  }
+
   getDuracao() {
     return this.duracao;
+  }
+
+  getPrioridade(){
+    return this.prioridade;
   }
 }
 
