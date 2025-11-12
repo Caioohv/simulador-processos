@@ -1,6 +1,8 @@
+import Prioridade from './prioridade.js';
 import Processo from './processo.js';
 import RoundRobin from './roundRobin.js';
 import ShortestJobFirst from "./shortestJobFirst.js";
+import ShortestRemainingTime from './shortestRemainingTime.js';
 
 
 const processos = [
@@ -14,6 +16,19 @@ const processosAdicionais = [
     new Processo(4, 't5', 5000, 2000, 1),
 ]
 
+const prioridade = new Prioridade();
+
+processos.forEach(processo => prioridade.adicionarProcesso(processo));
+
+prioridade.executar();
+
+processosAdicionais.forEach(p => setTimeout(() => {
+  prioridade.adicionarProcesso(p);
+}, p.getIngresso()));
+
+
+
+/* --SHORTEST JOB FIRST--
 const shortestJobFirst = new ShortestJobFirst();
 
 processos.forEach(processo => shortestJobFirst.adicionarProcesso(processo));
@@ -23,8 +38,7 @@ shortestJobFirst.executar();
 processosAdicionais.forEach(p => setTimeout(() => {
   shortestJobFirst.adicionarProcesso(p);
 }, p.getIngresso()));
-
-
+*/
 
 /* --ROUND ROBIN--
 const roundRobin = new RoundRobin(2000);
@@ -36,5 +50,4 @@ roundRobin.executar();
 processosAdicionais.forEach(p => setTimeout(() => {
   roundRobin.adicionarProcesso(p);
 }, p.getIngresso()));
-
 */
