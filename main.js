@@ -16,6 +16,17 @@ const processosAdicionais = [
     new Processo(4, 't5', 5000, 2000, 1),
 ]
 
+const shortestRemainingTime = new ShortestRemainingTime();
+
+processos.forEach(processo => shortestRemainingTime.adicionarProcesso(processo));
+
+shortestRemainingTime.executar();
+
+processosAdicionais.forEach(p => setTimeout(() => {
+  shortestRemainingTime.adicionarProcesso(p);
+}, p.getIngresso()));
+
+/* --PRIORIDADE--
 const prioridade = new Prioridade();
 
 processos.forEach(processo => prioridade.adicionarProcesso(processo));
@@ -25,8 +36,7 @@ prioridade.executar();
 processosAdicionais.forEach(p => setTimeout(() => {
   prioridade.adicionarProcesso(p);
 }, p.getIngresso()));
-
-
+*/
 
 /* --SHORTEST JOB FIRST--
 const shortestJobFirst = new ShortestJobFirst();
