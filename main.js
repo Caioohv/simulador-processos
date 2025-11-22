@@ -1,63 +1,32 @@
-import Prioridade from './prioridade.js';
-import Processo from './processo.js';
-import RoundRobin from './roundRobin.js';
-import ShortestJobFirst from "./shortestJobFirst.js";
-import ShortestRemainingTime from './shortestRemainingTime.js';
+// main.js - Exemplo de uso dos composables (Node.js)
+// Para usar no Nuxt, importe diretamente nas páginas
 
+import { useProcesso } from './composables/useProcesso.js'
+import { useSimuladorHospital } from './composables/useSimuladorHospital.js'
 
-const processos = [
-  new Processo(1, 't1', 0, 5000, 3),
-  new Processo(2, 't2', 0, 2000, 2),
-] 
+console.log('🏥 === SIMULADOR DO HOSPITAL DIGITAL ===')
+console.log('Este exemplo demonstra o uso dos composables.')
+console.log('Para interface completa, execute: npm run dev')
+console.log('')
 
-const processosAdicionais = [
-  new Processo(2, 't3',  1000,4000, 5),
-   new Processo(3, 't4', 3000, 1000, 2),
-    new Processo(4, 't5', 5000, 2000, 1),
-]
+// Demonstração básica dos composables
+async function exemploBasico() {
+  const { Processo, criarProcessosExemplo, compararAlgoritmos } = useSimuladorHospital()
+  
+  console.log('📋 Criando processos de exemplo...')
+  const processos = criarProcessosExemplo()
+  
+  console.log('🔄 Comparando algoritmos com 1 médico...')
+  await compararAlgoritmos(processos, 1, 2000)
+  
+  console.log('\n' + '='.repeat(50))
+  console.log('✅ Exemplo concluído!')
+  console.log('💡 Para ver interface completa: npm run dev')
+}
 
-const shortestRemainingTime = new ShortestRemainingTime();
+// Executar exemplo se este arquivo for executado diretamente
+if (import.meta.url === `file://${process.argv[1]}`) {
+  exemploBasico().catch(console.error)
+}
 
-processos.forEach(processo => shortestRemainingTime.adicionarProcesso(processo));
-
-shortestRemainingTime.executar();
-
-processosAdicionais.forEach(p => setTimeout(() => {
-  shortestRemainingTime.adicionarProcesso(p);
-}, p.getIngresso()));
-
-/* --PRIORIDADE--
-const prioridade = new Prioridade();
-
-processos.forEach(processo => prioridade.adicionarProcesso(processo));
-
-prioridade.executar();
-
-processosAdicionais.forEach(p => setTimeout(() => {
-  prioridade.adicionarProcesso(p);
-}, p.getIngresso()));
-*/
-
-/* --SHORTEST JOB FIRST--
-const shortestJobFirst = new ShortestJobFirst();
-
-processos.forEach(processo => shortestJobFirst.adicionarProcesso(processo));
-
-shortestJobFirst.executar();
-
-processosAdicionais.forEach(p => setTimeout(() => {
-  shortestJobFirst.adicionarProcesso(p);
-}, p.getIngresso()));
-*/
-
-/* --ROUND ROBIN--
-const roundRobin = new RoundRobin(2000);
-
-processos.forEach(processo => roundRobin.adicionarProcesso(processo));
-
-roundRobin.executar();
-
-processosAdicionais.forEach(p => setTimeout(() => {
-  roundRobin.adicionarProcesso(p);
-}, p.getIngresso()));
-*/
+export { useProcesso, useSimuladorHospital }
