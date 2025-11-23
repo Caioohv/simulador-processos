@@ -258,26 +258,43 @@
             </div>
           </div>
 
-          <!-- Métricas em Tempo Real -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="text-center">
-              <div class="text-2xl font-bold text-blue-600">{{ estadoTempoReal.metricas.processosCompletados }}</div>
-              <div class="text-sm text-gray-600">Concluídos</div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-green-600">{{ estadoTempoReal.metricas.tempoMedioEspera.toFixed(0)
-              }}ms</div>
-              <div class="text-sm text-gray-600">Espera Média</div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-purple-600">{{
-                estadoTempoReal.metricas.tempoMedioTurnaround.toFixed(0) }}ms</div>
-              <div class="text-sm text-gray-600">Turnaround Médio</div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-orange-600">{{ estadoTempoReal.metricas.utilizacaoMediaCPU.toFixed(1)
-              }}%</div>
-              <div class="text-sm text-gray-600">CPU Utilizada</div>
+          <!-- Indicadores de Desempenho em Tempo Real -->
+          <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-4 mb-6">
+            <h6 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              📊 Indicadores em Tempo Real
+              <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full animate-pulse">
+                ⚡ Ao Vivo
+              </span>
+            </h6>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-blue-600">
+                  {{ estadoTempoReal.metricas.tempoMedioEspera.toFixed(0) }}ms
+                </div>
+                <div class="text-xs text-gray-600">Tempo Médio de Espera</div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-green-600">
+                  {{ estadoTempoReal.metricas.tempoMedioTurnaround.toFixed(0) }}ms
+                </div>
+                <div class="text-xs text-gray-600">Tempo Médio de Execução</div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-yellow-600">
+                  {{ estadoTempoReal.metricas.numeroTrocasContexto || 0 }}
+                </div>
+                <div class="text-xs text-gray-600">Trocas de Contexto</div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-purple-600">
+                  {{ estadoTempoReal.metricas.utilizacaoMediaCPU.toFixed(1) }}%
+                </div>
+                <div class="text-xs text-gray-600">Utilização Média dos Médicos</div>
+              </div>
             </div>
           </div>
 
@@ -377,31 +394,43 @@
         <div v-if="resultado" class="bg-white rounded-lg shadow-lg p-6">
           <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Resultados da Simulação</h3>
 
-          <!-- Métricas Principais -->
-          <div class="grid md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-blue-50 rounded-lg p-4 text-center">
-              <div class="text-2xl font-bold text-blue-600">
-                {{ Math.round(resultado.metricas.tempoMedioEspera) }}ms
+          <!-- Indicadores de Desempenho -->
+          <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 mb-6">
+            <h6 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              📈 Indicadores de Desempenho
+              <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                Simulação Personalizada
+              </span>
+            </h6>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-blue-600">
+                  {{ Math.round(resultado.metricas.tempoMedioEspera) }}ms
+                </div>
+                <div class="text-xs text-gray-600">Tempo Médio de Espera</div>
               </div>
-              <div class="text-sm text-gray-600">Tempo Médio de Espera</div>
-            </div>
-            <div class="bg-green-50 rounded-lg p-4 text-center">
-              <div class="text-2xl font-bold text-green-600">
-                {{ Math.round(resultado.metricas.tempoMedioTurnaround) }}ms
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-green-600">
+                  {{ Math.round(resultado.metricas.tempoMedioTurnaround) }}ms
+                </div>
+                <div class="text-xs text-gray-600">Tempo Médio de Execução</div>
               </div>
-              <div class="text-sm text-gray-600">Tempo Médio Turnaround</div>
-            </div>
-            <div class="bg-yellow-50 rounded-lg p-4 text-center">
-              <div class="text-2xl font-bold text-yellow-600">
-                {{ resultado.metricas.numeroTrocasContexto }}
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-yellow-600">
+                  {{ resultado.metricas.numeroTrocasContexto }}
+                </div>
+                <div class="text-xs text-gray-600">Trocas de Contexto</div>
               </div>
-              <div class="text-sm text-gray-600">Trocas de Contexto</div>
-            </div>
-            <div class="bg-purple-50 rounded-lg p-4 text-center">
-              <div class="text-2xl font-bold text-purple-600">
-                {{ resultado.metricas.utilizacaoMediaCPU.toFixed(1) }}%
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-purple-600">
+                  {{ resultado.metricas.utilizacaoMediaCPU.toFixed(1) }}%
+                </div>
+                <div class="text-xs text-gray-600">Utilização Média dos Médicos</div>
               </div>
-              <div class="text-sm text-gray-600">Utilização CPU</div>
             </div>
           </div>
 
