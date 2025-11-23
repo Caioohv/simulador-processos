@@ -81,9 +81,10 @@
             class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
             🔍 Debug Normalização
           </button>
-          
+
           <!-- Botão temporário para debug do Cenário 3 -->
-          <button v-if="diagramasGanttCenarios['Cenário 3 - Hospital Moderno']?.preenchido" @click="debugDiagramaCenario3"
+          <button v-if="diagramasGanttCenarios['Cenário 3 - Hospital Moderno']?.preenchido"
+            @click="debugDiagramaCenario3"
             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
             🔥 Debug C3
           </button>
@@ -305,7 +306,7 @@
 
             <div>
               <h5 class="font-semibold text-gray-700 mb-2">⚡ Executando ({{ estadoTempoReal.processosExecutando.length
-                }})</h5>
+              }})</h5>
               <div class="space-y-2 max-h-32 overflow-y-auto">
                 <div v-for="processo in estadoTempoReal.processosExecutando" :key="processo.pid"
                   class="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
@@ -326,7 +327,7 @@
 
             <div>
               <h5 class="font-semibold text-gray-700 mb-2">✅ Finalizados ({{ estadoTempoReal.processosFinalizados.length
-                }})</h5>
+              }})</h5>
               <div class="space-y-2 max-h-32 overflow-y-auto">
                 <div v-for="processo in estadoTempoReal.processosFinalizados" :key="processo.pid"
                   class="p-2 bg-green-50 border border-green-200 rounded text-sm">
@@ -463,7 +464,7 @@
               <div class="bg-white rounded-lg p-3 text-center shadow-sm">
                 <div class="text-xl font-bold text-yellow-600">
                   {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.numeroTrocasContexto
-                  || 0 }}
+                    || 0 }}
                 </div>
                 <div class="text-xs text-gray-600">Trocas de Contexto</div>
               </div>
@@ -1208,7 +1209,7 @@ const debugDiagramaCenario3 = () => {
     console.log('❌ Cenário 3 não encontrado nos diagramas')
     return
   }
-  
+
   console.log('🔍 DEBUG COMPLETO CENÁRIO 3:', {
     preenchido: cenario3.preenchido,
     totalBlocos: cenario3.blocos.length,
@@ -1590,11 +1591,11 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
       () => {
         if (nomeCenario.includes('3')) {
           // Tentar match por posição ou padrão específico do cenário 3
-          const posicaoMedico = medicoId.match(/(medico-|dr\.?\s*)(\d+)/i)?.[2] || 
-                                medicoId.match(/[a-d]/i)?.[0]?.toLowerCase()
+          const posicaoMedico = medicoId.match(/(medico-|dr\.?\s*)(\d+)/i)?.[2] ||
+            medicoId.match(/[a-d]/i)?.[0]?.toLowerCase()
           const posicaoBloco = bloco.medico.match(/(medico-|dr\.?\s*)(\d+)/i)?.[2] ||
-                               bloco.medico.match(/[a-d]/i)?.[0]?.toLowerCase()
-          
+            bloco.medico.match(/[a-d]/i)?.[0]?.toLowerCase()
+
           return posicaoMedico && posicaoBloco && posicaoMedico === posicaoBloco
         }
         return false
@@ -1662,12 +1663,12 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
       })
 
       const medicosUnicos = Array.from(blocosPorMedicoReal.keys())
-      
+
       // Se temos médicos únicos suficientes, pegar blocos do médico correspondente
       if (indiceMedico < medicosUnicos.length) {
         const medicoCorreto = medicosUnicos[indiceMedico]
         const blocosFallback = blocosPorMedicoReal.get(medicoCorreto) || []
-        
+
         console.log(`🔧 Fallback inteligente - Médico ${indiceMedico} (${medicoId}) -> "${medicoCorreto}": ${blocosFallback.length} blocos`)
 
         if (blocosFallback.length > 0) {
