@@ -69,17 +69,23 @@
           </button>
 
           <!-- Botão temporário para debug -->
-          <button v-if="(resultados && Object.keys(resultados).length > 0) || Object.keys(resultadosSequenciais).length > 0" 
+          <button
+            v-if="(resultados && Object.keys(resultados).length > 0) || Object.keys(resultadosSequenciais).length > 0"
             @click="forcarPreenchimentoDiagramas"
             class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
             🔧 Debug: Forçar Diagramas
           </button>
 
           <!-- Botão para debug de normalização -->
-          <button v-if="totalDiagramasPreenchidos > 0" 
-            @click="debugNormalizacao"
+          <button v-if="totalDiagramasPreenchidos > 0" @click="debugNormalizacao"
             class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
             🔍 Debug Normalização
+          </button>
+          
+          <!-- Botão temporário para debug do Cenário 3 -->
+          <button v-if="diagramasGanttCenarios['Cenário 3 - Hospital Moderno']?.preenchido" @click="debugDiagramaCenario3"
+            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+            🔥 Debug C3
           </button>
         </div>
 
@@ -299,7 +305,7 @@
 
             <div>
               <h5 class="font-semibold text-gray-700 mb-2">⚡ Executando ({{ estadoTempoReal.processosExecutando.length
-              }})</h5>
+                }})</h5>
               <div class="space-y-2 max-h-32 overflow-y-auto">
                 <div v-for="processo in estadoTempoReal.processosExecutando" :key="processo.pid"
                   class="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
@@ -320,7 +326,7 @@
 
             <div>
               <h5 class="font-semibold text-gray-700 mb-2">✅ Finalizados ({{ estadoTempoReal.processosFinalizados.length
-              }})</h5>
+                }})</h5>
               <div class="space-y-2 max-h-32 overflow-y-auto">
                 <div v-for="processo in estadoTempoReal.processosFinalizados" :key="processo.pid"
                   class="p-2 bg-green-50 border border-green-200 rounded text-sm">
@@ -436,32 +442,36 @@
                 {{ cenario.nome }}
               </span>
             </h6>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div class="bg-white rounded-lg p-3 text-center shadow-sm">
                 <div class="text-xl font-bold text-blue-600">
-                  {{ Math.round((resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.tempoMedioEspera || 0) }}ms
+                  {{ Math.round((resultados?.[cenario.nome] ||
+                    resultadosSequenciais[cenario.nome])?.metricas?.tempoMedioEspera || 0) }}ms
                 </div>
                 <div class="text-xs text-gray-600">Tempo Médio de Espera</div>
               </div>
-              
+
               <div class="bg-white rounded-lg p-3 text-center shadow-sm">
                 <div class="text-xl font-bold text-green-600">
-                  {{ Math.round((resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.tempoMedioTurnaround || 0) }}ms
+                  {{ Math.round((resultados?.[cenario.nome] ||
+                    resultadosSequenciais[cenario.nome])?.metricas?.tempoMedioTurnaround || 0) }}ms
                 </div>
                 <div class="text-xs text-gray-600">Tempo Médio de Execução</div>
               </div>
-              
+
               <div class="bg-white rounded-lg p-3 text-center shadow-sm">
                 <div class="text-xl font-bold text-yellow-600">
-                  {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.numeroTrocasContexto || 0 }}
+                  {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.numeroTrocasContexto
+                  || 0 }}
                 </div>
                 <div class="text-xs text-gray-600">Trocas de Contexto</div>
               </div>
-              
+
               <div class="bg-white rounded-lg p-3 text-center shadow-sm">
                 <div class="text-xl font-bold text-purple-600">
-                  {{ ((resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.utilizacaoMediaCPU || 0).toFixed(1) }}%
+                  {{ ((resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.utilizacaoMediaCPU
+                    || 0).toFixed(1) }}%
                 </div>
                 <div class="text-xs text-gray-600">Utilização Média dos Médicos</div>
               </div>
@@ -475,17 +485,18 @@
               <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
                 {{ diagramasGanttCenarios[cenario.nome].blocos.length }} blocos
               </span>
-              <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full" 
-                    :title="`Tempo total: ${diagramasGanttCenarios[cenario.nome].tempoTotal}ms`">
+              <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full"
+                :title="`Tempo total: ${diagramasGanttCenarios[cenario.nome].tempoTotal}ms`">
                 🕐 Último Estado
               </span>
             </h6>
 
             <div class="space-y-3">
-              <div v-for="medico in diagramasGanttCenarios[cenario.nome].medicos" :key="medico.id" class="border rounded-lg p-3">
+              <div v-for="medico in diagramasGanttCenarios[cenario.nome].medicos" :key="medico.id"
+                class="border rounded-lg p-3">
                 <div class="font-medium text-gray-700 mb-2">{{ medico.nome }}</div>
                 <div class="relative h-8 bg-gray-100 rounded overflow-hidden">
-                  <div v-for="bloco in obterBlocosGanttFinal(cenario.nome, medico.nome)"
+                  <div v-for="bloco in obterBlocosDiagramaDedicado(cenario.nome, medico.id || medico.nome)"
                     :key="`${bloco.processo}-${bloco.inicio}`" :style="{
                       left: `${(bloco.inicio / diagramasGanttCenarios[cenario.nome].tempoTotal) * 100}%`,
                       width: `${Math.max(((bloco.fim - bloco.inicio) / diagramasGanttCenarios[cenario.nome].tempoTotal) * 100, 1)}%`,
@@ -506,108 +517,110 @@
           </div>
         </div>
 
-  <!-- Resultado do Cenário (modo instantâneo) -->
-  <div v-if="(resultados && resultados[cenario.nome]) && !resultadosSequenciais[cenario.nome]" class="p-6 bg-gray-50">
-    <h4 class="font-semibold text-gray-800 mb-4">📊 Resultados:</h4>
-    <div class="grid md:grid-cols-4 gap-4 mb-4">
-      <div class="bg-white rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-blue-600">
-          {{ Math.round((resultados?.[cenario.nome] ||
-            resultadosSequenciais[cenario.nome]).metricas.tempoMedioEspera) }}ms
-        </div>
-        <div class="text-sm text-gray-600">Tempo Médio de Espera</div>
-      </div>
-      <div class="bg-white rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-green-600">
-          {{ Math.round((resultados?.[cenario.nome] ||
-            resultadosSequenciais[cenario.nome]).metricas.tempoMedioTurnaround) }}ms
-        </div>
-        <div class="text-sm text-gray-600">Tempo Médio Turnaround</div>
-      </div>
-      <div class="bg-white rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-yellow-600">
-          {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).metricas.numeroTrocasContexto }}
-        </div>
-        <div class="text-sm text-gray-600">Trocas de Contexto</div>
-      </div>
-      <div class="bg-white rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-purple-600">
-          {{ (resultados?.[cenario.nome] ||
-            resultadosSequenciais[cenario.nome]).metricas.utilizacaoMediaCPU.toFixed(1) }}%
-        </div>
-        <div class="text-sm text-gray-600">Utilização CPU</div>
-      </div>
-    </div>
-
-    <!-- Diagrama de Gantt Final -->
-    <div class="bg-white rounded-lg p-4 mb-4">
-      <h5 class="font-medium text-gray-800 mb-3">📊 Diagrama de Gantt Final:</h5>
-      <div class="space-y-3">
-        <div v-for="medico in (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).medicos"
-          :key="medico.id">
-          <div class="text-sm font-medium text-gray-700 mb-1">{{ medico.nome }}</div>
-          <div class="h-8 bg-gray-100 rounded border relative overflow-hidden">
-            <div v-for="bloco in obterBlocosGanttCenario(cenario.nome, medico.id)"
-              :key="`${bloco.inicio}-${bloco.processo}`" :style="{
-                left: `${(bloco.inicio / (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).metricas.tempoTotalSimulacao) * 100}%`,
-                width: `${((bloco.fim - bloco.inicio) / (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).metricas.tempoTotalSimulacao) * 100}%`,
-                backgroundColor: bloco.cor
-              }" class="absolute top-0 h-8 flex items-center justify-center text-xs text-white font-medium"
-              :title="`${bloco.processo}: ${bloco.inicio}ms - ${bloco.fim}ms`">
-              {{ bloco.processo.split(' ')[0] }}
+        <!-- Resultado do Cenário (modo instantâneo) -->
+        <div v-if="(resultados && resultados[cenario.nome]) && !resultadosSequenciais[cenario.nome]"
+          class="p-6 bg-gray-50">
+          <h4 class="font-semibold text-gray-800 mb-4">📊 Resultados:</h4>
+          <div class="grid md:grid-cols-4 gap-4 mb-4">
+            <div class="bg-white rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-blue-600">
+                {{ Math.round((resultados?.[cenario.nome] ||
+                  resultadosSequenciais[cenario.nome]).metricas.tempoMedioEspera) }}ms
+              </div>
+              <div class="text-sm text-gray-600">Tempo Médio de Espera</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-green-600">
+                {{ Math.round((resultados?.[cenario.nome] ||
+                  resultadosSequenciais[cenario.nome]).metricas.tempoMedioTurnaround) }}ms
+              </div>
+              <div class="text-sm text-gray-600">Tempo Médio Turnaround</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-yellow-600">
+                {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).metricas.numeroTrocasContexto }}
+              </div>
+              <div class="text-sm text-gray-600">Trocas de Contexto</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-purple-600">
+                {{ (resultados?.[cenario.nome] ||
+                  resultadosSequenciais[cenario.nome]).metricas.utilizacaoMediaCPU.toFixed(1) }}%
+              </div>
+              <div class="text-sm text-gray-600">Utilização CPU</div>
             </div>
           </div>
 
-          <div class="flex justify-between text-xs text-gray-500 mt-1">
-            <span>0ms</span>
-            <span>{{ (resultados?.[cenario.nome] ||
-              resultadosSequenciais[cenario.nome]).metricas.tempoTotalSimulacao }}ms</span>
+          <!-- Diagrama de Gantt Final -->
+          <div class="bg-white rounded-lg p-4 mb-4">
+            <h5 class="font-medium text-gray-800 mb-3">📊 Diagrama de Gantt Final:</h5>
+            <div class="space-y-3">
+              <div v-for="medico in (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).medicos"
+                :key="medico.id">
+                <div class="text-sm font-medium text-gray-700 mb-1">{{ medico.nome }}</div>
+                <div class="h-8 bg-gray-100 rounded border relative overflow-hidden">
+                  <div v-for="bloco in obterBlocosGanttCenario(cenario.nome, medico.id)"
+                    :key="`${bloco.inicio}-${bloco.processo}`" :style="{
+                      left: `${(bloco.inicio / (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).metricas.tempoTotalSimulacao) * 100}%`,
+                      width: `${((bloco.fim - bloco.inicio) / (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).metricas.tempoTotalSimulacao) * 100}%`,
+                      backgroundColor: bloco.cor
+                    }" class="absolute top-0 h-8 flex items-center justify-center text-xs text-white font-medium"
+                    :title="`${bloco.processo}: ${bloco.inicio}ms - ${bloco.fim}ms`">
+                    {{ bloco.processo.split(' ')[0] }}
+                  </div>
+                </div>
+
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>0ms</span>
+                  <span>{{ (resultados?.[cenario.nome] ||
+                    resultadosSequenciais[cenario.nome]).metricas.tempoTotalSimulacao }}ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline de Eventos -->
+          <div class="bg-white rounded-lg p-4">
+            <h5 class="font-medium text-gray-800 mb-3">📋 Timeline de Eventos:</h5>
+            <div class="max-h-64 overflow-y-auto">
+              <div
+                v-for="evento in (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).eventos.slice(0, 20)"
+                :key="`${evento.tempo}-${evento.processo.pid}-${evento.tipo}`"
+                class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-b-0">
+                <div class="text-xs text-gray-500 w-16">{{ evento.tempo }}ms</div>
+                <div class="w-2 h-2 rounded-full" :class="{
+                  'bg-green-500': evento.tipo === 'inicio',
+                  'bg-red-500': evento.tipo === 'fim',
+                  'bg-yellow-500': evento.tipo === 'preempcao',
+                  'bg-blue-500': evento.tipo === 'chegada'
+                }"></div>
+                <div class="text-sm">{{ evento.descricao }}</div>
+              </div>
+              <div v-if="(resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).eventos.length > 20"
+                class="text-center py-2 text-gray-500 text-sm">
+                ... e mais {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).eventos.length - 20 }}
+                eventos
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Timeline de Eventos -->
-    <div class="bg-white rounded-lg p-4">
-      <h5 class="font-medium text-gray-800 mb-3">📋 Timeline de Eventos:</h5>
-      <div class="max-h-64 overflow-y-auto">
-        <div v-for="evento in (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).eventos.slice(0, 20)"
-          :key="`${evento.tempo}-${evento.processo.pid}-${evento.tipo}`"
-          class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-b-0">
-          <div class="text-xs text-gray-500 w-16">{{ evento.tempo }}ms</div>
-          <div class="w-2 h-2 rounded-full" :class="{
-            'bg-green-500': evento.tipo === 'inicio',
-            'bg-red-500': evento.tipo === 'fim',
-            'bg-yellow-500': evento.tipo === 'preempcao',
-            'bg-blue-500': evento.tipo === 'chegada'
-          }"></div>
-          <div class="text-sm">{{ evento.descricao }}</div>
-        </div>
-        <div v-if="(resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).eventos.length > 20"
-          class="text-center py-2 text-gray-500 text-sm">
-          ... e mais {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome]).eventos.length - 20 }}
-          eventos
+    <!-- Console de Saída -->
+    <div v-if="consoleOutput.length > 0" class="bg-black text-green-400 rounded-lg p-4 font-mono text-sm">
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-white font-bold">🖥️ Console de Execução</h3>
+        <button @click="consoleOutput = []" class="text-gray-400 hover:text-white text-xs">
+          Limpar
+        </button>
+      </div>
+      <div class="max-h-96 overflow-y-auto">
+        <div v-for="(linha, index) in consoleOutput" :key="index" class="mb-1">
+          {{ linha }}
         </div>
       </div>
     </div>
-  </div>
-  </div>
-  </div>
-
-  <!-- Console de Saída -->
-  <div v-if="consoleOutput.length > 0" class="bg-black text-green-400 rounded-lg p-4 font-mono text-sm">
-    <div class="flex justify-between items-center mb-2">
-      <h3 class="text-white font-bold">🖥️ Console de Execução</h3>
-      <button @click="consoleOutput = []" class="text-gray-400 hover:text-white text-xs">
-        Limpar
-      </button>
-    </div>
-    <div class="max-h-96 overflow-y-auto">
-      <div v-for="(linha, index) in consoleOutput" :key="index" class="mb-1">
-        {{ linha }}
-      </div>
-    </div>
-  </div>
   </div>
 </template>
 
@@ -898,7 +911,7 @@ const carregarDiagramasLocalStorage = () => {
     const dados = localStorage.getItem('simulador-diagramas-cenarios')
     if (dados) {
       const dadosParsed = JSON.parse(dados)
-      
+
       // Compatibilidade com formato antigo
       if (dadosParsed.diagramas) {
         diagramasGanttCenarios.value = dadosParsed.diagramas
@@ -945,12 +958,29 @@ const preencherDiagramaCenario = (nomeCenario: string, resultado: ResultadoSimul
 
   // Usar sempre dados do resultado capturado (estado final da simulação)
   const diagramaFonte = resultado.diagramaGantt
-  
+
   console.log(`🎨 Capturando estado final idêntico ao tempo real:`, {
     blocosCapturados: diagramaFonte?.length || 0,
     tempoFinal: resultado.metricas?.tempoTotalSimulacao,
-    exemploBloco: diagramaFonte?.[0]
+    exemploBloco: diagramaFonte?.[0],
+    todosOsBlocos: diagramaFonte?.slice(0, 10) // Mostrar primeiros 10 blocos para debug
   })
+
+  // Debug específico para Cenário 3
+  if (nomeCenario.includes('3')) {
+    console.log(`🔥 DEBUG CENÁRIO 3 - Dados brutos capturados:`, {
+      quantidadeBlocos: diagramaFonte?.length,
+      medicosUnicos: [...new Set(diagramaFonte?.map(b => b.medico) || [])],
+      processosUnicos: [...new Set(diagramaFonte?.map(b => b.processo) || [])],
+      exemplosDeBlocos: diagramaFonte?.slice(0, 5).map(b => ({
+        medico: b.medico,
+        processo: b.processo,
+        inicio: b.inicio,
+        fim: b.fim,
+        duracao: b.fim - b.inicio
+      })) || []
+    })
+  }
 
   if (diagramaFonte && diagramaFonte.length > 0) {
     // Capturar blocos exatamente como estão no estado final
@@ -1069,13 +1099,13 @@ const escalaTempoFixa = ref<number>(0)
 // Função para calcular o tempo máximo entre todos os cenários (para alinhamento visual)
 const calcularTempoMaximoGlobal = () => {
   let tempoMaximo = 0
-  
+
   Object.values(diagramasGanttCenarios.value).forEach(diagrama => {
     if (diagrama.preenchido && diagrama.tempoTotal > tempoMaximo) {
       tempoMaximo = diagrama.tempoTotal
     }
   })
-  
+
   // Se não há diagramas preenchidos, usar um valor padrão mínimo
   return tempoMaximo > 0 ? tempoMaximo : 1000
 }
@@ -1105,9 +1135,9 @@ const modoVisualizacao = 'normalizado'
 const obterTempoMinimoGlobal = (nomeCenario: string) => {
   const diagrama = diagramasGanttCenarios.value[nomeCenario]
   if (!diagrama || !diagrama.preenchido) return 0
-  
+
   let tempoMinimoGlobal = Infinity
-  
+
   diagrama.medicos.forEach(medico => {
     const blocos = obterBlocosDiagramaDedicado(nomeCenario, medico.id)
     if (blocos.length > 0) {
@@ -1117,19 +1147,19 @@ const obterTempoMinimoGlobal = (nomeCenario: string) => {
       }
     }
   })
-  
+
   return tempoMinimoGlobal === Infinity ? 0 : tempoMinimoGlobal
 }
 
 // Função para normalizar blocos por médico usando o tempo mínimo global
 const normalizarBlocosPorMedico = (nomeCenario: string, medicoId: string) => {
   const blocos = obterBlocosDiagramaDedicado(nomeCenario, medicoId)
-  
+
   if (blocos.length === 0) return []
-  
+
   // Usar o tempo mínimo global do cenário, não o específico do médico
   const tempoMinimoGlobal = obterTempoMinimoGlobal(nomeCenario)
-  
+
   // Normalizar todos os blocos deste médico usando o tempo global
   return blocos.map(bloco => ({
     ...bloco,
@@ -1144,9 +1174,9 @@ const normalizarBlocosPorMedico = (nomeCenario: string, medicoId: string) => {
 const obterTempoMaximoNormalizado = (nomeCenario: string) => {
   const diagrama = diagramasGanttCenarios.value[nomeCenario]
   if (!diagrama || !diagrama.preenchido) return 0
-  
+
   let tempoMaximo = 0
-  
+
   diagrama.medicos.forEach(medico => {
     const blocosNormalizados = normalizarBlocosPorMedico(nomeCenario, medico.id)
     if (blocosNormalizados.length > 0) {
@@ -1156,7 +1186,7 @@ const obterTempoMaximoNormalizado = (nomeCenario: string) => {
       }
     }
   })
-  
+
   return tempoMaximo
 }
 
@@ -1169,6 +1199,25 @@ const obterEscalaTempoVisualizacao = (nomeCenario?: string) => {
     }
   }
   return obterTempoEscalaComum()
+}
+
+// Função de debug temporária para inspecionar diagramas
+const debugDiagramaCenario3 = () => {
+  const cenario3 = diagramasGanttCenarios.value['Cenário 3 - Hospital Moderno']
+  if (!cenario3) {
+    console.log('❌ Cenário 3 não encontrado nos diagramas')
+    return
+  }
+  
+  console.log('🔍 DEBUG COMPLETO CENÁRIO 3:', {
+    preenchido: cenario3.preenchido,
+    totalBlocos: cenario3.blocos.length,
+    tempoTotal: cenario3.tempoTotal,
+    medicos: cenario3.medicos,
+    medicosNosBlocos: [...new Set(cenario3.blocos.map(b => b.medico))],
+    processosNosBlocos: [...new Set(cenario3.blocos.map(b => b.processo))],
+    primeiros10Blocos: cenario3.blocos.slice(0, 10)
+  })
 }
 
 // Métodos
@@ -1202,7 +1251,7 @@ const executarCenarioSelecionado = async (cenario: CenarioTeste) => {
             // Capturar estado final completo da simulação
             const estadoFinal = JSON.parse(JSON.stringify(estadoTempoReal.value))
             const eventosFinal = JSON.parse(JSON.stringify(eventosTempoReal.value))
-            
+
             console.log(`📊 Capturando estado final para ${cenario.nome}:`, {
               tempoFinal: estadoFinal.tempoAtual,
               blocosDiagrama: estadoFinal.diagramaGantt.length,
@@ -1312,7 +1361,7 @@ const executarTodosCenarios = async () => {
               // Capturar estado final completo da simulação
               const estadoFinal = JSON.parse(JSON.stringify(estadoTempoReal.value))
               const eventosFinal = JSON.parse(JSON.stringify(eventosTempoReal.value))
-              
+
               console.log(`📊 Capturando estado final sequencial para ${cenario.nome}:`, {
                 tempoFinal: estadoFinal.tempoAtual,
                 blocosDiagrama: estadoFinal.diagramaGantt.length,
@@ -1407,7 +1456,7 @@ const limparResultados = () => {
   consoleOutput.value = []
   tempoExecucao.value = 0
   limparCoresProcessos()
-  
+
   // Não resetar escala para manter alinhamento visual dos diagramas persistentes
   console.log(`🧹 Resultados limpos - diagramas dedicados e escala preservados`)
 }
@@ -1415,10 +1464,10 @@ const limparResultados = () => {
 // Função para debug: força preenchimento dos diagramas com dados existentes
 const forcarPreenchimentoDiagramas = () => {
   console.log(`🔧 Forçando preenchimento de diagramas com dados existentes`)
-  
+
   // Debug dos diagramas atuais
   console.log(`📊 Estado atual dos diagramas:`, diagramasGanttCenarios.value)
-  
+
   Object.entries(resultados.value || {}).forEach(([nomeCenario, resultado]) => {
     console.log(`🔍 Tentando preencher ${nomeCenario} com dados existentes:`, {
       temDiagrama: !!resultado.diagramaGantt,
@@ -1431,7 +1480,7 @@ const forcarPreenchimentoDiagramas = () => {
     }
     preencherDiagramaCenario(nomeCenario, resultado)
   })
-  
+
   Object.entries(resultadosSequenciais.value || {}).forEach(([nomeCenario, resultado]) => {
     console.log(`🔍 Tentando preencher ${nomeCenario} com dados sequenciais:`, {
       temDiagrama: !!resultado.diagramaGantt,
@@ -1444,7 +1493,7 @@ const forcarPreenchimentoDiagramas = () => {
     }
     preencherDiagramaCenario(nomeCenario, resultado)
   })
-  
+
   // Debug final
   console.log(`📊 Estado final dos diagramas após forçar preenchimento:`, diagramasGanttCenarios.value)
 }
@@ -1476,6 +1525,16 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
     return []
   }
 
+  // Debug específico para Cenário 3
+  if (nomeCenario.includes('3')) {
+    console.log(`🔥 DEBUG CENÁRIO 3 - Filtragem para médico "${medicoId}":`, {
+      totalBlocos: diagrama.blocos.length,
+      medicosDisponiveis: [...new Set(diagrama.blocos.map(b => b.medico))],
+      exemploBloco: diagrama.blocos[0],
+      parametroMedico: medicoId
+    })
+  }
+
 
 
   const medicoIdLower = medicoId.toLowerCase().trim()
@@ -1493,17 +1552,17 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
     const estrategias = [
       // 1. Match exato
       () => medicoNomeBloco === medicoIdLower,
-      
+
       // 2. Match por ID numérico
       () => {
         const numeroId = medicoId.match(/\d+/)?.[0]
         const numeroBloco = bloco.medico.match(/\d+/)?.[0]
         return numeroId && numeroBloco && numeroId === numeroBloco
       },
-      
+
       // 3. Match por conteúdo parcial
       () => medicoNomeBloco.includes(medicoIdLower) || medicoIdLower.includes(medicoNomeBloco),
-      
+
       // 4. Match por palavras-chave específicas
       () => {
         const palavrasChave = ['dr.', 'dra.', 'doutor', 'doutora', 'medico', 'dr', 'médico']
@@ -1512,19 +1571,33 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
           (medicoNomeBloco.includes('dr') && medicoIdLower.includes('dr'))
         )
       },
-      
+
       // 5. Match por letra final (Dr. A -> A)
       () => {
         const letraId = medicoId.match(/[a-zA-Z]$/)?.[0]?.toLowerCase()
         const letraBloco = bloco.medico.match(/[a-zA-Z]$/)?.[0]?.toLowerCase()
         return letraId && letraBloco && letraId === letraBloco
       },
-      
+
       // 6. Match menos restritivo - qualquer letra em comum no final
       () => {
         const ultimaLetraId = medicoId.charAt(medicoId.length - 1).toLowerCase()
         const ultimaLetraBloco = bloco.medico.charAt(bloco.medico.length - 1).toLowerCase()
         return ultimaLetraId && ultimaLetraBloco && ultimaLetraId === ultimaLetraBloco && /[a-z]/.test(ultimaLetraId)
+      },
+
+      // 7. Match especial para Cenário 3 - médicos podem ter nomes diferentes
+      () => {
+        if (nomeCenario.includes('3')) {
+          // Tentar match por posição ou padrão específico do cenário 3
+          const posicaoMedico = medicoId.match(/(medico-|dr\.?\s*)(\d+)/i)?.[2] || 
+                                medicoId.match(/[a-d]/i)?.[0]?.toLowerCase()
+          const posicaoBloco = bloco.medico.match(/(medico-|dr\.?\s*)(\d+)/i)?.[2] ||
+                               bloco.medico.match(/[a-d]/i)?.[0]?.toLowerCase()
+          
+          return posicaoMedico && posicaoBloco && posicaoMedico === posicaoBloco
+        }
+        return false
       }
     ]
 
@@ -1545,38 +1618,72 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
   })
     .sort((a, b) => a.inicio - b.inicio)
 
+  // Debug específico para Cenário 3 - resultado da filtragem
+  if (nomeCenario.includes('3')) {
+    console.log(`🔥 DEBUG CENÁRIO 3 - Resultado da filtragem para "${medicoId}":`, {
+      blocosFiltrados: blocosFiltrados.length,
+      exemplosBlocosFiltrados: blocosFiltrados.slice(0, 3).map(b => ({
+        medico: b.medico,
+        processo: b.processo,
+        inicio: b.inicio,
+        fim: b.fim
+      }))
+    })
+  }
+
   // Se não encontrou blocos, tentar fallback por posição do médico
   if (blocosFiltrados.length === 0 && diagrama.medicos.length > 0) {
     console.warn(`⚠️ Não encontrou blocos com matching tradicional, tentando fallback por posição`)
-    
-    const indiceMedico = diagrama.medicos.findIndex(m => 
-      m.id === medicoId || m.nome === medicoId || m.id?.toLowerCase() === medicoIdLower
+
+    // Primeiro, tentar encontrar o médico na lista
+    let indiceMedico = diagrama.medicos.findIndex(m =>
+      m.id === medicoId || m.nome === medicoId || m.id?.toLowerCase() === medicoIdLower ||
+      m.nome?.toLowerCase() === medicoIdLower
     )
-    
-    if (indiceMedico >= 0) {
-      // Tentar pegar todos os blocos e dividir igualmente entre os médicos
-      const todosBlocos = diagrama.blocos
-      const blocosPorMedico = Math.ceil(todosBlocos.length / diagrama.medicos.length)
-      const inicio = indiceMedico * blocosPorMedico
-      const fim = Math.min(inicio + blocosPorMedico, todosBlocos.length)
-      
-      const blocosFallback = todosBlocos.slice(inicio, fim)
-      
-      console.log(`🔧 Fallback por posição - Médico ${indiceMedico}: blocos ${inicio}-${fim-1} (${blocosFallback.length} blocos)`)
-      
-      if (blocosFallback.length > 0) {
-        return blocosFallback.sort((a, b) => a.inicio - b.inicio)
+
+    // Se não encontrou, tentar por padrão de letra/número
+    if (indiceMedico === -1) {
+      const letraMedico = medicoId.match(/[a-d]/i)?.[0]?.toLowerCase()
+      if (letraMedico) {
+        const mapeamento = { 'a': 0, 'b': 1, 'c': 2, 'd': 3 }
+        indiceMedico = mapeamento[letraMedico] ?? -1
       }
     }
-    
+
+    if (indiceMedico >= 0 && indiceMedico < diagrama.medicos.length) {
+      // Estratégia inteligente: agrupar blocos por médico baseado no nome real dos blocos
+      const blocosPorMedicoReal = new Map()
+      diagrama.blocos.forEach(bloco => {
+        const key = bloco.medico
+        if (!blocosPorMedicoReal.has(key)) {
+          blocosPorMedicoReal.set(key, [])
+        }
+        blocosPorMedicoReal.get(key).push(bloco)
+      })
+
+      const medicosUnicos = Array.from(blocosPorMedicoReal.keys())
+      
+      // Se temos médicos únicos suficientes, pegar blocos do médico correspondente
+      if (indiceMedico < medicosUnicos.length) {
+        const medicoCorreto = medicosUnicos[indiceMedico]
+        const blocosFallback = blocosPorMedicoReal.get(medicoCorreto) || []
+        
+        console.log(`🔧 Fallback inteligente - Médico ${indiceMedico} (${medicoId}) -> "${medicoCorreto}": ${blocosFallback.length} blocos`)
+
+        if (blocosFallback.length > 0) {
+          return blocosFallback.sort((a, b) => a.inicio - b.inicio)
+        }
+      }
+    }
+
     // Último recurso: pegar qualquer bloco que mencione o médico de forma relaxada
     const blocosRelaxados = diagrama.blocos.filter(bloco => {
       const textoBloco = (bloco.medico || '').toLowerCase()
       const textoMedico = medicoIdLower
-      
+
       // Matching super relaxado - qualquer substring em comum
       return textoBloco.length > 0 && textoMedico.length > 0 && (
-        textoBloco.includes(textoMedico) || 
+        textoBloco.includes(textoMedico) ||
         textoMedico.includes(textoBloco) ||
         // Matching por primeira letra se for um médico tipo "Dr. A"
         (textoMedico.endsWith('a') && textoBloco.includes('a')) ||
@@ -1584,9 +1691,9 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
         (textoMedico.endsWith('c') && textoBloco.includes('c'))
       )
     })
-    
+
     console.log(`🔧 Fallback relaxado encontrou ${blocosRelaxados.length} blocos`)
-    
+
     if (blocosRelaxados.length > 0) {
       return blocosRelaxados.sort((a, b) => a.inicio - b.inicio)
     }
@@ -1600,12 +1707,12 @@ const obterBlocosDiagramaDedicado = (nomeCenario: string, medicoId: string) => {
 // Função para debug simples de diagramas
 const debugMedicoBloco = (nomeCenario: string) => {
   const diagrama = diagramasGanttCenarios.value[nomeCenario]
-  
+
   if (!diagrama) {
     console.log(`❌ Diagrama ${nomeCenario} não existe`)
     return
   }
-  
+
   console.log(`� ${nomeCenario}:`, {
     preenchido: diagrama.preenchido,
     blocos: diagrama.blocos.length,
@@ -1619,26 +1726,26 @@ const debugMedicoBloco = (nomeCenario: string) => {
 const debugNormalizacao = () => {
   console.log('\n🔍 DEBUG DIAGRAMAS FINAIS:')
   console.log(`   🎨 Modo atual: ${modoVisualizacao} (sempre tempos originais)`)
-  
+
   Object.keys(diagramasGanttCenarios.value).forEach(nomeCenario => {
     const diagrama = diagramasGanttCenarios.value[nomeCenario]
     if (!diagrama.preenchido) return
-    
+
     console.log(`\n📋 CENÁRIO: ${nomeCenario}`)
     console.log(`   🕐 Tempo total: ${diagrama.tempoTotal}ms`)
     console.log(`   📊 Escala visualização: ${obterEscalaTempoVisualizacao(nomeCenario)}ms`)
-    
+
     diagrama.medicos.forEach(medico => {
       const blocos = obterBlocosDiagramaDedicado(nomeCenario, medico.id)
-      
+
       if (blocos.length > 0) {
         const tempoMin = Math.min(...blocos.map(b => b.inicio))
         const tempoMax = Math.max(...blocos.map(b => b.fim))
-        
+
         console.log(`   👨‍⚕️ ${medico.nome}:`)
         console.log(`      📊 ${blocos.length} blocos`)
         console.log(`      ⏰ Período: ${tempoMin}ms - ${tempoMax}ms`)
-        
+
         // Mostrar alguns blocos de exemplo
         blocos.slice(0, 2).forEach((bloco, i) => {
           console.log(`         [${i}] ${bloco.processo}: ${bloco.inicio}-${bloco.fim}ms (${bloco.fim - bloco.inicio}ms)`)
@@ -1646,7 +1753,7 @@ const debugNormalizacao = () => {
       }
     })
   })
-  
+
   console.log(`\n⚖️ Escalas:`)
   console.log(`   🌐 Fixa global: ${escalaTempoFixa.value}ms`)
   console.log(`   📏 Absoluta: ${obterTempoEscalaComum()}ms`)
@@ -1659,54 +1766,54 @@ const debugNormalizacao = () => {
 // Função detalhada para debug de alinhamento de blocos
 const debugAlinhamentoBlocos = (nomeCenario: string) => {
   const diagrama = diagramasGanttCenarios.value[nomeCenario]
-  
+
   if (!diagrama || !diagrama.preenchido) {
     console.log(`❌ Diagrama ${nomeCenario} não preenchido`)
     return
   }
-  
+
   console.log(`🔍 DEBUG TEMPOS ORIGINAIS - ${nomeCenario}:`)
   console.log(`   📊 Escala fixa: ${escalaTempoFixa.value}ms`)
   console.log(`   ⏱️ Tempo total cenário: ${diagrama.tempoTotal}ms`)
   console.log(`   🎯 Escala comum: ${obterTempoEscalaComum()}ms`)
   console.log(`   🎨 Modo atual: ${modoVisualizacao}`)
   console.log(`   ⚖️ Escala ativa: ${obterEscalaTempoVisualizacao(nomeCenario)}ms`)
-  
+
   // Analisar distribuição dos tempos dos blocos
   const todosTempos = diagrama.blocos.map(b => ({ inicio: b.inicio, fim: b.fim }))
   const tempoMinimo = Math.min(...todosTempos.map(t => t.inicio))
   const tempoMaximo = Math.max(...todosTempos.map(t => t.fim))
-  
+
   console.log(`   📈 Range temporal dos blocos: ${tempoMinimo}ms - ${tempoMaximo}ms`)
   console.log(`   🎨 Total de ${diagrama.blocos.length} blocos`)
-  
+
   // Analisar cada médico
   diagrama.medicos.forEach(medico => {
     const blocosDoMedico = obterBlocosDiagramaDedicado(nomeCenario, medico.id)
-    
+
     if (blocosDoMedico.length > 0) {
       const primeiroBloco = blocosDoMedico[0]
       const ultimoBloco = blocosDoMedico[blocosDoMedico.length - 1]
-      
+
       // Calcular posições visuais
       const posicaoInicialVisual = (primeiroBloco.inicio / obterTempoEscalaComum()) * 100
       const posicaoFinalVisual = (ultimoBloco.fim / obterTempoEscalaComum()) * 100
-      
+
       // Dados normalizados
       const blocosNormalizados = normalizarBlocosPorMedico(nomeCenario, medico.id)
       const primeiroNorm = blocosNormalizados[0]
       const ultimoNorm = blocosNormalizados[blocosNormalizados.length - 1]
-      
+
       console.log(`   👨‍⚕️ ${medico.nome} (${medico.id}):`)
       console.log(`      🔹 ${blocosDoMedico.length} blocos`)
       console.log(`      🔹 Tempo absoluto: ${primeiroBloco.inicio}ms - ${ultimoBloco.fim}ms`)
       console.log(`      🔹 Tempo normalizado: ${primeiroNorm.inicioNormalizado}ms - ${ultimoNorm.fimNormalizado}ms`)
       console.log(`      🔹 Posição visual absoluta: ${posicaoInicialVisual.toFixed(1)}% - ${posicaoFinalVisual.toFixed(1)}%`)
-      
+
       const posVisualNormInicio = (primeiroNorm.inicioNormalizado / obterTempoMaximoNormalizado(nomeCenario)) * 100
       const posVisualNormFim = (ultimoNorm.fimNormalizado / obterTempoMaximoNormalizado(nomeCenario)) * 100
       console.log(`      🔹 Posição visual normalizada: ${posVisualNormInicio.toFixed(1)}% - ${posVisualNormFim.toFixed(1)}%`)
-      
+
       // Listar primeiros blocos para debug
       blocosDoMedico.slice(0, 3).forEach((bloco, i) => {
         const posLeft = (bloco.inicio / obterTempoEscalaComum()) * 100
@@ -1721,15 +1828,7 @@ const debugAlinhamentoBlocos = (nomeCenario: string) => {
 
 
 
-// Função para obter blocos do diagrama final (estado capturado)
-const obterBlocosGanttFinal = (nomeCenario: string, nomemedico: string) => {
-  const diagrama = diagramasGanttCenarios.value[nomeCenario]
-  if (!diagrama || !diagrama.blocos) return []
-  
-  return diagrama.blocos
-    .filter(bloco => bloco.medico === nomemedico || bloco.medico.toLowerCase().includes(nomemedico.toLowerCase()))
-    .sort((a, b) => a.inicio - b.inicio)
-}
+
 
 // Carregar diagramas e inicializar quando o componente é montado
 inicializarDiagramasCenarios()
