@@ -43,6 +43,8 @@
               🔬 Simulação
             </NuxtLink>
 
+
+
             <NuxtLink to="/comparacao" :class="[
               'px-3 py-2 rounded-lg transition-colors text-sm font-medium',
               $route.path === '/comparacao'
@@ -101,6 +103,8 @@
             ]">
               🔬 Simulação Personalizada
             </NuxtLink>
+
+
 
             <NuxtLink to="/comparacao" @click="menuMobileAberto = false" :class="[
               'px-3 py-2 rounded-lg transition-colors text-sm font-medium',

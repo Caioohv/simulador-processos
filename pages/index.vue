@@ -22,8 +22,10 @@
         class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow border-l-4 border-blue-500">
         <div class="text-3xl mb-3">🎯</div>
         <h3 class="text-xl font-semibold text-gray-800 mb-2">Simulação Personalizada</h3>
-        <p class="text-gray-600">Configure e execute simulações com parâmetros customizados</p>
+        <p class="text-gray-600">Configure e execute simulações instantâneas ou em tempo real</p>
       </NuxtLink>
+
+
 
       <NuxtLink to="/cenarios"
         class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow border-l-4 border-green-500">
@@ -75,20 +77,20 @@
         <div class="border rounded-lg p-4">
           <div class="flex items-center mb-3">
             <span class="text-2xl mr-3">🔄</span>
-            <h3 class="text-lg font-semibold">Shortest Remaining Time (Preemptivo)</h3>
+            <h3 class="text-lg font-semibold">Shortest Remaining Time First (Preemptivo)</h3>
           </div>
           <p class="text-gray-600 text-sm">
-            Pode interromper consultas para atender pacientes com menos tempo restante.
+            Pode interromper consultas para atender pacientes com menos tempo restante a qualquer momento.
           </p>
         </div>
 
         <div class="border rounded-lg p-4">
           <div class="flex items-center mb-3">
             <span class="text-2xl mr-3">⭐</span>
-            <h3 class="text-lg font-semibold">Prioridade (Não-preemptivo)</h3>
+            <h3 class="text-lg font-semibold">Prioridade (Cooperativo)</h3>
           </div>
           <p class="text-gray-600 text-sm">
-            Atende pacientes por ordem de urgência médica. Inclui sistema de envelhecimento.
+            Atende pacientes por ordem de urgência médica. Não-preemptivo - processo roda até terminar.
           </p>
         </div>
       </div>
