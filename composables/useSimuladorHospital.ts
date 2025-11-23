@@ -15,23 +15,35 @@ import { useProcesso } from './useProcesso'
 export const useSimuladorHospital = () => {
   const { Processo, criarProcessosExemplo } = useProcesso()
 
-  // Cenários pré-definidos do trabalho
+  // Cenários pré-definidos expandidos - 4 algoritmos com 1, 2 e 4 médicos cada
   const criarCenarios = (): CenarioTeste[] => {
-    return [
+    const cenarios: CenarioTeste[] = []
+    
+    // Algoritmos a testar
+    const algoritmos = [
+      { tipo: AlgoritmoEscalonamento.PRIORIDADE, nome: 'Prioridade' },
+      { tipo: AlgoritmoEscalonamento.ROUND_ROBIN, nome: 'Round Robin' },
+      { tipo: AlgoritmoEscalonamento.SHORTEST_JOB_FIRST, nome: 'Shortest Job First' },
+      { tipo: AlgoritmoEscalonamento.SHORTEST_REMAINING_TIME, nome: 'Shortest Remaining Time' }
+    ]
+    
+    // Configurações de médicos
+    const configMedicos = [1, 2, 4]
+    
+    // Dados dos cenários base
+    const cenariosBases = [
       {
-        nome: "Cenário 1 - Emergência Crítica",
-        descricao: "1 Médico disponível com pacientes de diferentes níveis de urgência",
-        configuracao: {
-          algoritmo: AlgoritmoEscalonamento.PRIORIDADE,
-          numeroMedicos: 1,
-          processos: [
-            { pid: 1, nome: '🚑 João (UTI)', ingresso: 0, duracao: 8000, prioridade: 1 },
-            { pid: 2, nome: '👴 Maria (Consulta)', ingresso: 500, duracao: 3000, prioridade: 4 },
-            { pid: 3, nome: '🤰 Ana (Emergência)', ingresso: 1000, duracao: 5000, prioridade: 1 },
-            { pid: 4, nome: '👶 Pedro (Pediatria)', ingresso: 2000, duracao: 2000, prioridade: 2 },
-            { pid: 5, nome: '👨 Carlos (Rotina)', ingresso: 3000, duracao: 4000, prioridade: 5 }
-          ]
-        },
+        numero: 1,
+        nome: "Emergência Crítica",
+        descricao: "Pacientes de diferentes níveis de urgência",
+        icone: "🚨",
+        processos: [
+          { pid: 1, nome: '🚑 João (UTI)', ingresso: 0, duracao: 8000, prioridade: 1 },
+          { pid: 2, nome: '👴 Maria (Consulta)', ingresso: 500, duracao: 3000, prioridade: 4 },
+          { pid: 3, nome: '🤰 Ana (Emergência)', ingresso: 1000, duracao: 5000, prioridade: 1 },
+          { pid: 4, nome: '👶 Pedro (Pediatria)', ingresso: 2000, duracao: 2000, prioridade: 2 },
+          { pid: 5, nome: '👨 Carlos (Rotina)', ingresso: 3000, duracao: 4000, prioridade: 5 }
+        ],
         objetivos: [
           "Observar como os algoritmos tratam processos de alta prioridade",
           "Verificar se há inanição em algoritmos que não consideram prioridade",
@@ -40,27 +52,24 @@ export const useSimuladorHospital = () => {
         perguntasAnalise: [
           "Qual algoritmo atende mais rapidamente os pacientes críticos?",
           "Algum paciente de baixa prioridade sofreu inanição?",
-          "Como o Round Robin trata pacientes críticos vs. rotina?"
+          "Como cada algoritmo trata pacientes críticos vs. rotina?"
         ]
       },
       {
-        nome: "Cenário 2 - Plantão Lotado",
-        descricao: "2 Médicos disponíveis com alta carga de pacientes",
-        configuracao: {
-          algoritmo: AlgoritmoEscalonamento.ROUND_ROBIN,
-          numeroMedicos: 2,
-          quantum: 2000,
-          processos: [
-            { pid: 1, nome: '👴 João', ingresso: 0, duracao: 6000, prioridade: 3 },
-            { pid: 2, nome: '🤰 Maria', ingresso: 500, duracao: 3000, prioridade: 2 },
-            { pid: 3, nome: '👶 Ana', ingresso: 1000, duracao: 8000, prioridade: 1 },
-            { pid: 4, nome: '👨 Pedro', ingresso: 1500, duracao: 2000, prioridade: 4 },
-            { pid: 5, nome: '👵 Carla', ingresso: 2000, duracao: 5000, prioridade: 2 },
-            { pid: 6, nome: '🚑 Bruno', ingresso: 2500, duracao: 1000, prioridade: 1 },
-            { pid: 7, nome: '👨 Luis', ingresso: 3000, duracao: 4000, prioridade: 3 },
-            { pid: 8, nome: '👩 Sofia', ingresso: 3500, duracao: 3500, prioridade: 2 }
-          ]
-        },
+        numero: 2,
+        nome: "Plantão Lotado",
+        descricao: "Alta carga de pacientes diversos",
+        icone: "🏥",
+        processos: [
+          { pid: 1, nome: '👴 João', ingresso: 0, duracao: 6000, prioridade: 3 },
+          { pid: 2, nome: '🤰 Maria', ingresso: 500, duracao: 3000, prioridade: 2 },
+          { pid: 3, nome: '👶 Ana', ingresso: 1000, duracao: 8000, prioridade: 1 },
+          { pid: 4, nome: '👨 Pedro', ingresso: 1500, duracao: 2000, prioridade: 4 },
+          { pid: 5, nome: '👵 Carla', ingresso: 2000, duracao: 5000, prioridade: 2 },
+          { pid: 6, nome: '🚑 Bruno', ingresso: 2500, duracao: 1000, prioridade: 1 },
+          { pid: 7, nome: '👨 Luis', ingresso: 3000, duracao: 4000, prioridade: 3 },
+          { pid: 8, nome: '👩 Sofia', ingresso: 3500, duracao: 3500, prioridade: 2 }
+        ],
         objetivos: [
           "Verificar comportamento sob carga intensa",
           "Comparar impacto das preempções",
@@ -73,24 +82,22 @@ export const useSimuladorHospital = () => {
         ]
       },
       {
-        nome: "Cenário 3 - Hospital Moderno",
-        descricao: "4 Médicos disponíveis com pacientes diversos",
-        configuracao: {
-          algoritmo: AlgoritmoEscalonamento.SHORTEST_REMAINING_TIME,
-          numeroMedicos: 4,
-          processos: [
-            { pid: 1, nome: '👴 João', ingresso: 0, duracao: 7000, prioridade: 3 },
-            { pid: 2, nome: '🤰 Maria', ingresso: 1000, duracao: 2000, prioridade: 1 },
-            { pid: 3, nome: '👶 Ana', ingresso: 2000, duracao: 9000, prioridade: 2 },
-            { pid: 4, nome: '👨 Pedro', ingresso: 3000, duracao: 1000, prioridade: 4 },
-            { pid: 5, nome: '👵 Carla', ingresso: 4000, duracao: 6000, prioridade: 2 },
-            { pid: 6, nome: '🚑 Bruno', ingresso: 5000, duracao: 500, prioridade: 1 },
-            { pid: 7, nome: '👨 Luis', ingresso: 6000, duracao: 8000, prioridade: 3 },
-            { pid: 8, nome: '👩 Sofia', ingresso: 7000, duracao: 3000, prioridade: 2 },
-            { pid: 9, nome: '🧓 Roberto', ingresso: 8000, duracao: 4000, prioridade: 4 },
-            { pid: 10, nome: '👩 Lucia', ingresso: 9000, duracao: 2500, prioridade: 1 }
-          ]
-        },
+        numero: 3,
+        nome: "Hospital Moderno",
+        descricao: "Recursos abundantes com pacientes diversos",
+        icone: "🔬",
+        processos: [
+          { pid: 1, nome: '👴 João', ingresso: 0, duracao: 7000, prioridade: 3 },
+          { pid: 2, nome: '🤰 Maria', ingresso: 1000, duracao: 2000, prioridade: 1 },
+          { pid: 3, nome: '👶 Ana', ingresso: 2000, duracao: 9000, prioridade: 2 },
+          { pid: 4, nome: '👨 Pedro', ingresso: 3000, duracao: 1000, prioridade: 4 },
+          { pid: 5, nome: '👵 Carla', ingresso: 4000, duracao: 6000, prioridade: 2 },
+          { pid: 6, nome: '🚑 Bruno', ingresso: 5000, duracao: 500, prioridade: 1 },
+          { pid: 7, nome: '👨 Luis', ingresso: 6000, duracao: 8000, prioridade: 3 },
+          { pid: 8, nome: '👩 Sofia', ingresso: 7000, duracao: 3000, prioridade: 2 },
+          { pid: 9, nome: '🧓 Roberto', ingresso: 8000, duracao: 4000, prioridade: 4 },
+          { pid: 10, nome: '👩 Lucia', ingresso: 9000, duracao: 2500, prioridade: 1 }
+        ],
         objetivos: [
           "Avaliar comportamento com recursos abundantes",
           "Verificar adaptação a múltiplos núcleos",
@@ -103,6 +110,28 @@ export const useSimuladorHospital = () => {
         ]
       }
     ]
+    
+    // Gerar todos os cenários (3 cenários × 4 algoritmos × 3 configurações de médicos = 36 cenários)
+    for (const cenarioBase of cenariosBases) {
+      for (const algoritmo of algoritmos) {
+        for (const numMedicos of configMedicos) {
+          cenarios.push({
+            nome: `Cenário ${cenarioBase.numero} - ${cenarioBase.nome} (${algoritmo.nome}, ${numMedicos} médico${numMedicos > 1 ? 's' : ''})`,
+            descricao: `${cenarioBase.descricao} - ${algoritmo.nome} com ${numMedicos} médico${numMedicos > 1 ? 's' : ''}`,
+            configuracao: {
+              algoritmo: algoritmo.tipo,
+              numeroMedicos: numMedicos,
+              quantum: algoritmo.tipo === AlgoritmoEscalonamento.ROUND_ROBIN ? 2000 : undefined,
+              processos: cenarioBase.processos
+            },
+            objetivos: cenarioBase.objetivos,
+            perguntasAnalise: cenarioBase.perguntasAnalise
+          })
+        }
+      }
+    }
+    
+    return cenarios
   }
 
   const executarSimulacao = async (configuracao: ConfiguracaoSimulacao): Promise<ResultadoSimulacao> => {

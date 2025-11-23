@@ -98,6 +98,105 @@
             </div>
           </div>
 
+          <!-- Usar Cenário -->
+          <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+            <h3 class="text-sm font-semibold text-purple-800 mb-3 flex items-center gap-2">
+              <span>🎭</span> Usar Cenário Predefinido
+            </h3>
+            
+            <div class="space-y-3">
+              <!-- Seleção do Cenário Base -->
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Cenário Base</label>
+                <select v-model="cenarioSelecionado.base" @change="atualizarCenariosFiltrados" 
+                        class="w-full text-xs border border-gray-300 rounded px-2 py-1">
+                  <option value="">Selecione um cenário...</option>
+                  <option value="1">Cenário 1 - Emergência Crítica</option>
+                  <option value="2">Cenário 2 - Plantão Lotado</option>
+                  <option value="3">Cenário 3 - Hospital Moderno</option>
+                </select>
+              </div>
+
+              <!-- Seleção do Algoritmo -->
+              <div v-if="cenarioSelecionado.base">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Algoritmo</label>
+                <select v-model="cenarioSelecionado.algoritmo" @change="atualizarCenariosFiltrados"
+                        class="w-full text-xs border border-gray-300 rounded px-2 py-1">
+                  <option value="">Algoritmo atual ({{ formatarAlgoritmoDisplay(configuracao.algoritmo) }})</option>
+                  <option value="Prioridade">Prioridade</option>
+                  <option value="Round Robin">Round Robin</option>
+                  <option value="Shortest Job First">Shortest Job First</option>
+                  <option value="Shortest Remaining Time">Shortest Remaining Time</option>
+                </select>
+              </div>
+
+              <!-- Seleção do Número de Médicos -->
+              <div v-if="cenarioSelecionado.base">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Número de Médicos</label>
+                <select v-model="cenarioSelecionado.medicos" @change="atualizarCenariosFiltrados"
+                        class="w-full text-xs border border-gray-300 rounded px-2 py-1">
+                  <option value="">Configuração atual ({{ configuracao.numeroMedicos }})</option>
+                  <option value="1">1 Médico</option>
+                  <option value="2">2 Médicos</option>
+                  <option value="4">4 Médicos</option>
+                </select>
+              </div>
+
+              <!-- Botão para Aplicar Cenário -->
+              <button v-if="cenarioSelecionado.base" @click="aplicarCenario" 
+                      class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-3 rounded text-sm transition-colors">
+                <span class="flex items-center justify-center gap-2">
+                  <span>🎯</span>
+                  Aplicar Cenário
+                </span>
+              </button>
+
+              <!-- Info do cenário selecionado -->
+              <div v-if="cenarioEncontrado" class="text-xs text-gray-600 bg-white p-3 rounded border">
+                <div class="font-medium text-gray-800">{{ cenarioEncontrado.nome }}</div>
+                <div class="text-gray-600 mt-1">{{ cenarioEncontrado.descricao }}</div>
+                <div class="mt-2 text-xs">
+                  <span class="text-purple-600">{{ cenarioEncontrado.configuracao.processos.length }} pacientes</span>
+                  <span class="mx-1">•</span>
+                  <span class="text-blue-600">{{ formatarAlgoritmo(cenarioEncontrado.configuracao.algoritmo) }}</span>
+                  <span class="mx-1">•</span>
+                  <span class="text-green-600">{{ cenarioEncontrado.configuracao.numeroMedicos }} médico(s)</span>
+                  <span v-if="cenarioEncontrado.configuracao.quantum" class="mx-1">•</span>
+                  <span v-if="cenarioEncontrado.configuracao.quantum" class="text-orange-600">{{ cenarioEncontrado.configuracao.quantum }}ms quantum</span>
+                </div>
+                
+                <!-- Preview dos primeiros 3 processos -->
+                <div class="mt-2 pt-2 border-t border-gray-200">
+                  <div class="text-xs text-gray-500 mb-1">Primeiros pacientes:</div>
+                  <div class="flex flex-wrap gap-1">
+                    <div v-for="(processo, index) in cenarioEncontrado.configuracao.processos.slice(0, 3)" 
+                         :key="processo.pid" 
+                         class="bg-gray-100 px-2 py-1 rounded text-xs">
+                      {{ processo.nome.split(' ')[0] }} ({{ processo.duracao }}ms, P{{ processo.prioridade }})
+                    </div>
+                    <div v-if="cenarioEncontrado.configuracao.processos.length > 3" 
+                         class="text-xs text-gray-400 self-center">
+                      +{{ cenarioEncontrado.configuracao.processos.length - 3 }} mais...
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resumo dos cenários disponíveis -->
+              <div v-if="!cenarioSelecionado.base" class="text-xs text-gray-500 bg-gray-50 p-3 rounded">
+                <div class="font-medium text-gray-700 mb-2">📋 Cenários Disponíveis:</div>
+                <div class="space-y-1">
+                  <div><strong>Cenário 1:</strong> Emergência Crítica (5 pacientes)</div>
+                  <div><strong>Cenário 2:</strong> Plantão Lotado (8 pacientes)</div>
+                  <div><strong>Cenário 3:</strong> Hospital Moderno (10 pacientes)</div>
+                </div>
+                <div class="mt-2 text-xs">
+                  Cada cenário pode ser testado com 4 algoritmos e 3 configurações de médicos!
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Controles -->
           <div class="space-y-3">
             <!-- Controles Modo Instantâneo -->
@@ -565,6 +664,17 @@ const novoProcesso = ref({
   prioridade: 3
 })
 
+// Cenários predefinidos
+const { criarCenarios } = useSimuladorHospital()
+const todosCenarios = criarCenarios()
+
+// Seleção de cenário
+const cenarioSelecionado = ref({
+  base: '',
+  algoritmo: '',
+  medicos: ''
+})
+
 // Computed
 const podeAdicionarProcesso = computed(() => {
   return novoProcesso.value.nome.trim() !== '' &&
@@ -703,6 +813,98 @@ const pararSimulacaoTempoReal = () => {
 
 const atualizarVelocidadeTempoReal = () => {
   simulacaoTempoReal.definirVelocidade(velocidadeSimulacao.value)
+}
+
+// Funções para cenários predefinidos
+const cenarioEncontrado = computed(() => {
+  if (!cenarioSelecionado.value.base) return null
+
+  return todosCenarios.find(cenario => {
+    const matchBase = cenario.nome.includes(`Cenário ${cenarioSelecionado.value.base}`)
+    
+    const matchAlgoritmo = cenarioSelecionado.value.algoritmo 
+      ? cenario.nome.includes(cenarioSelecionado.value.algoritmo)
+      : true
+
+    const matchMedicos = cenarioSelecionado.value.medicos
+      ? cenario.configuracao.numeroMedicos === parseInt(cenarioSelecionado.value.medicos)
+      : true
+
+    return matchBase && matchAlgoritmo && matchMedicos
+  }) || null
+})
+
+const atualizarCenariosFiltrados = () => {
+  // Função chamada quando os filtros mudam - computed já se atualiza automaticamente
+}
+
+const aplicarCenario = () => {
+  const cenario = cenarioEncontrado.value
+  if (!cenario) return
+
+  // Aplicar configuração do cenário
+  configuracao.value.algoritmo = cenario.configuracao.algoritmo
+  configuracao.value.numeroMedicos = cenario.configuracao.numeroMedicos
+  if (cenario.configuracao.quantum) {
+    configuracao.value.quantum = cenario.configuracao.quantum
+  }
+
+  // Limpar processos atuais
+  processos.value = []
+  
+  // Adicionar processos do cenário
+  cenario.configuracao.processos.forEach(processoConfig => {
+    const processo = new Processo(
+      processoConfig.pid,
+      processoConfig.nome,
+      processoConfig.ingresso,
+      processoConfig.duracao,
+      processoConfig.prioridade
+    )
+    processos.value.push(processo)
+  })
+
+  // Limpar seleção
+  cenarioSelecionado.value = {
+    base: '',
+    algoritmo: '',
+    medicos: ''
+  }
+
+  alert(`✅ Cenário "${cenario.nome}" aplicado com sucesso!\n\n` +
+        `📊 ${processos.value.length} pacientes carregados\n` +
+        `🔧 Algoritmo: ${formatarAlgoritmoDisplay(configuracao.value.algoritmo)}\n` +
+        `👥 Médicos: ${configuracao.value.numeroMedicos}`)
+}
+
+// Função para converter algoritmo do cenário para enum
+const converterAlgoritmoParaEnum = (algoritmo: AlgoritmoEscalonamento): AlgoritmoEscalonamento => {
+  // O algoritmo do cenário já está no formato correto do enum
+  return algoritmo
+}
+
+// Função para formatar algoritmo para exibição
+const formatarAlgoritmoDisplay = (algoritmo: AlgoritmoEscalonamento): string => {
+  const mapeamento: Record<string, string> = {
+    'round_robin': 'Round Robin',
+    'shortest_job_first': 'Shortest Job First',
+    'shortest_remaining_time': 'Shortest Remaining Time',
+    'prioridade': 'Prioridade'
+  }
+  
+  return mapeamento[algoritmo] || algoritmo
+}
+
+// Função para formatar algoritmo do cenário
+const formatarAlgoritmo = (algoritmo: AlgoritmoEscalonamento): string => {
+  const mapeamento: Record<string, string> = {
+    [AlgoritmoEscalonamento.ROUND_ROBIN]: 'Round Robin',
+    [AlgoritmoEscalonamento.SHORTEST_JOB_FIRST]: 'Shortest Job First',
+    [AlgoritmoEscalonamento.SHORTEST_REMAINING_TIME]: 'Shortest Remaining Time',
+    [AlgoritmoEscalonamento.PRIORIDADE]: 'Prioridade'
+  }
+  
+  return mapeamento[algoritmo] || algoritmo
 }
 
 const obterBlocosGanttTempoReal = (medico: string) => {

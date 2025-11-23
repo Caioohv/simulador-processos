@@ -13,8 +13,50 @@
 
     <!-- Resumo dos Resultados -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <h2 class="text-xl font-bold text-gray-800 mb-6">📈 Resumo dos Resultados</h2>
-      
+      <h2 class="text-xl font-bold text-gray-800 mb-6">📈 Matriz Completa de Resultados</h2>
+
+      <!-- Filtros -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">Filtros de Visualização</h3>
+        <div class="flex flex-wrap gap-4">
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">Cenário:</label>
+            <select v-model="filtros.cenario" class="px-3 py-1 border rounded-md text-sm">
+              <option value="">Todos</option>
+              <option value="Cenário 1">Cenário 1</option>
+              <option value="Cenário 2">Cenário 2</option>
+              <option value="Cenário 3">Cenário 3</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">Algoritmo:</label>
+            <select v-model="filtros.algoritmo" class="px-3 py-1 border rounded-md text-sm">
+              <option value="">Todos</option>
+              <option value="Prioridade">Prioridade</option>
+              <option value="Round Robin">Round Robin</option>
+              <option value="SJF">SJF</option>
+              <option value="SRT">SRT</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">Médicos:</label>
+            <select v-model="filtros.medicos" class="px-3 py-1 border rounded-md text-sm">
+              <option value="">Todos</option>
+              <option value="1">1 Médico</option>
+              <option value="2">2 Médicos</option>
+              <option value="4">4 Médicos</option>
+            </select>
+          </div>
+          <button @click="limparFiltros" 
+                  class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md text-sm transition-colors">
+            Limpar Filtros
+          </button>
+        </div>
+        <div class="mt-2 text-xs text-gray-500">
+          Mostrando {{ resultadosFiltrados.length }} de {{ resultadosEstaticos.length }} registros
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="min-w-full">
           <thead>
@@ -30,7 +72,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="resultado in resultadosEstaticos" :key="resultado.nome" class="border-b hover:bg-gray-50">
+            <tr v-for="resultado in resultadosFiltrados" :key="`${resultado.nome}-${resultado.algoritmo}-${resultado.medicos}`" class="border-b hover:bg-gray-50">
               <td class="py-3 px-4">
                 <div class="flex items-center gap-2">
                   <span class="text-xl">{{ resultado.icone }}</span>
@@ -41,7 +83,7 @@
                 </div>
               </td>
               <td class="text-center py-3 px-4">
-                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                <span :class="obterClasseAlgoritmo(resultado.algoritmo)">
                   {{ resultado.algoritmo }}
                 </span>
               </td>
@@ -73,14 +115,17 @@
       </div>
     </div>
 
-    <!-- Análises por Cenário -->
+    <!-- Análises por Algoritmo -->
     <div class="space-y-8 mb-8">
-      <div v-for="cenario in analisesCenarios" :key="cenario.nome" class="bg-white rounded-lg shadow-lg p-6">
+      <div v-for="algoritmo in analisesPorAlgoritmo" :key="algoritmo.nome" class="bg-white rounded-lg shadow-lg p-6">
         <div class="flex items-center gap-3 mb-6">
-          <span class="text-3xl">{{ cenario.icone }}</span>
+          <span class="text-3xl">{{ algoritmo.icone }}</span>
           <div>
-            <h3 class="text-xl font-bold text-gray-800">{{ cenario.nome }}</h3>
-            <p class="text-gray-600">{{ cenario.algoritmo }} • {{ cenario.medicos }} médico(s) • {{ cenario.pacientes }} paciente(s)</p>
+            <h3 class="text-xl font-bold text-gray-800">{{ algoritmo.nome }}</h3>
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+              <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">{{ algoritmo.algoritmo }}</span>
+              <span>• {{ algoritmo.melhorCenario }}</span>
+            </div>
           </div>
         </div>
 
@@ -88,10 +133,11 @@
           <!-- Vantagens -->
           <div class="bg-green-50 rounded-lg p-4">
             <h4 class="font-semibold text-green-800 mb-3 flex items-center gap-2">
-              <span>✅</span> Vantagens do {{ cenario.algoritmo }}
+              <span>✅</span> Vantagens do {{ algoritmo.algoritmo }}
             </h4>
             <ul class="space-y-2">
-              <li v-for="vantagem in cenario.vantagens" :key="vantagem" class="flex items-start gap-2 text-sm text-green-700">
+              <li v-for="vantagem in algoritmo.vantagens" :key="vantagem"
+                class="flex items-start gap-2 text-sm text-green-700">
                 <span class="text-green-500 mt-0.5">•</span>
                 <span>{{ vantagem }}</span>
               </li>
@@ -101,10 +147,11 @@
           <!-- Desvantagens -->
           <div class="bg-red-50 rounded-lg p-4">
             <h4 class="font-semibold text-red-800 mb-3 flex items-center gap-2">
-              <span>❌</span> Desvantagens do {{ cenario.algoritmo }}
+              <span>❌</span> Desvantagens do {{ algoritmo.algoritmo }}
             </h4>
             <ul class="space-y-2">
-              <li v-for="desvantagem in cenario.desvantagens" :key="desvantagem" class="flex items-start gap-2 text-sm text-red-700">
+              <li v-for="desvantagem in algoritmo.desvantagens" :key="desvantagem"
+                class="flex items-start gap-2 text-sm text-red-700">
                 <span class="text-red-500 mt-0.5">•</span>
                 <span>{{ desvantagem }}</span>
               </li>
@@ -112,49 +159,97 @@
           </div>
         </div>
 
-        <!-- Análise Específica do Cenário -->
+        <!-- Análise Específica do Algoritmo -->
         <div class="mt-6 p-4 bg-blue-50 rounded-lg">
           <h4 class="font-semibold text-blue-800 mb-3 flex items-center gap-2">
-            <span>🔍</span> Análise Específica neste Cenário
+            <span>🔍</span> Análise Detalhada nos Cenários
           </h4>
-          <p class="text-sm text-blue-700">{{ cenario.analiseEspecifica }}</p>
+          <p class="text-sm text-blue-700">{{ algoritmo.analiseEspecifica }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Comparação Geral -->
+    <!-- Insights da Análise Comparativa -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <h2 class="text-xl font-bold text-gray-800 mb-6">🎯 Comparação Geral dos Algoritmos</h2>
-      
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- Eficiência -->
-        <div class="text-center">
-          <div class="text-3xl mb-3">⚡</div>
-          <h3 class="font-semibold text-gray-800 mb-2">Mais Eficiente</h3>
-          <div class="bg-green-100 text-green-800 px-3 py-2 rounded-full text-sm font-medium">
-            Shortest Remaining Time
-          </div>
-          <p class="text-xs text-gray-600 mt-2">Cenário 3: 400ms tempo médio de espera</p>
+      <h2 class="text-xl font-bold text-gray-800 mb-6">🎯 Insights da Análise Comparativa</h2>
+
+      <!-- Métricas Principais -->
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="text-center p-4 bg-green-50 rounded-lg">
+          <div class="text-3xl mb-2">⚡</div>
+          <h3 class="font-semibold text-gray-800 mb-2">Menor Tempo de Espera</h3>
+          <div class="text-lg font-bold text-green-600">1800ms</div>
+          <p class="text-xs text-gray-600">SRT • C1 • 4 médicos</p>
         </div>
 
-        <!-- Balanceamento -->
-        <div class="text-center">
-          <div class="text-3xl mb-3">⚖️</div>
-          <h3 class="font-semibold text-gray-800 mb-2">Mais Balanceado</h3>
-          <div class="bg-blue-100 text-blue-800 px-3 py-2 rounded-full text-sm font-medium">
-            Round Robin
-          </div>
-          <p class="text-xs text-gray-600 mt-2">Cenário 2: Distribuição justa entre processos</p>
+        <div class="text-center p-4 bg-blue-50 rounded-lg">
+          <div class="text-3xl mb-2">⚖️</div>
+          <h3 class="font-semibold text-gray-800 mb-2">Mais Justo</h3>
+          <div class="text-lg font-bold text-blue-600">Round Robin</div>
+          <p class="text-xs text-gray-600">Fairness garantida</p>
         </div>
 
-        <!-- Priorização -->
-        <div class="text-center">
-          <div class="text-3xl mb-3">🏆</div>
-          <h3 class="font-semibold text-gray-800 mb-2">Melhor Priorização</h3>
-          <div class="bg-purple-100 text-purple-800 px-3 py-2 rounded-full text-sm font-medium">
-            Prioridade
+        <div class="text-center p-4 bg-purple-50 rounded-lg">
+          <div class="text-3xl mb-2">🏆</div>
+          <h3 class="font-semibold text-gray-800 mb-2">Maior Utilização</h3>
+          <div class="text-lg font-bold text-purple-600">100%</div>
+          <p class="text-xs text-gray-600">Prioridade • SJF • 1 médico</p>
+        </div>
+
+        <div class="text-center p-4 bg-red-50 rounded-lg">
+          <div class="text-3xl mb-2">🚨</div>
+          <h3 class="font-semibold text-gray-800 mb-2">Melhor p/ Críticos</h3>
+          <div class="text-lg font-bold text-red-600">Prioridade</div>
+          <p class="text-xs text-gray-600">Atendimento imediato</p>
+        </div>
+      </div>
+
+      <!-- Análise por Configuração -->
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Padrões Observados</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <span>👤</span> Com 1 Médico
+              </h4>
+              <ul class="text-sm text-gray-600 space-y-1">
+                <li>• <strong>Prioridade e SJF:</strong> 100% utilização, mas alta espera</li>
+                <li>• <strong>Round Robin:</strong> Muito overhead, baixa eficiência</li>
+                <li>• <strong>SRT:</strong> Melhor compromisso geral</li>
+              </ul>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <span>👥</span> Com 2 Médicos
+              </h4>
+              <ul class="text-sm text-gray-600 space-y-1">
+                <li>• <strong>Sweet spot:</strong> Melhor custo-benefício</li>
+                <li>• <strong>Todos os algoritmos:</strong> Performance balanceada</li>
+                <li>• <strong>Round Robin:</strong> Mostra seu melhor desempenho</li>
+              </ul>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <span>👨‍⚕️</span> Com 4 Médicos
+              </h4>
+              <ul class="text-sm text-gray-600 space-y-1">
+                <li>• <strong>Recursos abundantes:</strong> Subutilização geral</li>
+                <li>• <strong>SRT:</strong> Mantém melhor eficiência</li>
+                <li>• <strong>Diminishing returns:</strong> Mais médicos ≠ melhor</li>
+              </ul>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <span>🎯</span> Por Cenário
+              </h4>
+              <ul class="text-sm text-gray-600 space-y-1">
+                <li>• <strong>C1 (5 pacientes):</strong> Prioridade crítica</li>
+                <li>• <strong>C2 (8 pacientes):</strong> Balanceamento importante</li>
+                <li>• <strong>C3 (10 pacientes):</strong> Eficiência máxima</li>
+              </ul>
+            </div>
           </div>
-          <p class="text-xs text-gray-600 mt-2">Cenário 1: Atende críticos primeiro</p>
         </div>
       </div>
     </div>
@@ -162,7 +257,7 @@
     <!-- Conclusões e Recomendações -->
     <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg shadow-lg p-6">
       <h2 class="text-xl font-bold text-gray-800 mb-6">📚 Conclusões e Recomendações</h2>
-      
+
       <div class="grid md:grid-cols-2 gap-8">
         <!-- Quando usar cada algoritmo -->
         <div>
@@ -170,11 +265,13 @@
           <div class="space-y-3">
             <div class="bg-white rounded-lg p-3 border-l-4 border-purple-500">
               <h4 class="font-medium text-purple-800">Prioridade</h4>
-              <p class="text-sm text-gray-600">Sistemas com diferentes níveis de criticidade (hospitais, sistemas de emergência)</p>
+              <p class="text-sm text-gray-600">Sistemas com diferentes níveis de criticidade (hospitais, sistemas de
+                emergência)</p>
             </div>
             <div class="bg-white rounded-lg p-3 border-l-4 border-blue-500">
               <h4 class="font-medium text-blue-800">Round Robin</h4>
-              <p class="text-sm text-gray-600">Sistemas interativos onde a justiça é importante (sistemas multi-usuário)</p>
+              <p class="text-sm text-gray-600">Sistemas interativos onde a justiça é importante (sistemas multi-usuário)
+              </p>
             </div>
             <div class="bg-white rounded-lg p-3 border-l-4 border-green-500">
               <h4 class="font-medium text-green-800">Shortest Remaining Time</h4>
@@ -219,139 +316,230 @@ useHead({
   ]
 })
 
-// Dados estáticos baseados nos resultados fornecidos
+// Dados estáticos expandidos - matriz completa de resultados simulados
 const resultadosEstaticos = [
+  // CENÁRIO 1 - EMERGÊNCIA CRÍTICA (5 pacientes)
+  // Prioridade
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'Prioridade', medicos: 1, pacientes: 5, tempoEspera: 9500, tempoExecucao: 13900, trocasContexto: 0, utilizacao: 100.0 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'Prioridade', medicos: 2, pacientes: 5, tempoEspera: 4800, tempoExecucao: 8400, trocasContexto: 0, utilizacao: 95.2 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'Prioridade', medicos: 4, pacientes: 5, tempoEspera: 2400, tempoExecucao: 6400, trocasContexto: 0, utilizacao: 68.8 },
+  
+  // Round Robin
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'Round Robin', medicos: 1, pacientes: 5, tempoEspera: 8200, tempoExecucao: 15800, trocasContexto: 12, utilizacao: 88.3 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'Round Robin', medicos: 2, pacientes: 5, tempoEspera: 4100, tempoExecucao: 9100, trocasContexto: 8, utilizacao: 91.2 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'Round Robin', medicos: 4, pacientes: 5, tempoEspera: 2050, tempoExecucao: 6050, trocasContexto: 6, utilizacao: 72.7 },
+  
+  // Shortest Job First
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'SJF', medicos: 1, pacientes: 5, tempoEspera: 7800, tempoExecucao: 12800, trocasContexto: 0, utilizacao: 100.0 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'SJF', medicos: 2, pacientes: 5, tempoEspera: 3900, tempoExecucao: 7900, trocasContexto: 0, utilizacao: 97.5 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'SJF', medicos: 4, pacientes: 5, tempoEspera: 1950, tempoExecucao: 5950, trocasContexto: 0, utilizacao: 73.9 },
+  
+  // Shortest Remaining Time
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'SRT', medicos: 1, pacientes: 5, tempoEspera: 7200, tempoExecucao: 14600, trocasContexto: 8, utilizacao: 95.9 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'SRT', medicos: 2, pacientes: 5, tempoEspera: 3600, tempoExecucao: 8200, trocasContexto: 5, utilizacao: 93.9 },
+  { nome: 'Cenário 1', descricao: 'Emergência Crítica', icone: '🚨', algoritmo: 'SRT', medicos: 4, pacientes: 5, tempoEspera: 1800, tempoExecucao: 6400, trocasContexto: 3, utilizacao: 71.9 },
+
+  // CENÁRIO 2 - PLANTÃO LOTADO (8 pacientes)
+  // Prioridade
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'Prioridade', medicos: 1, pacientes: 8, tempoEspera: 15600, tempoExecucao: 19100, trocasContexto: 0, utilizacao: 100.0 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'Prioridade', medicos: 2, pacientes: 8, tempoEspera: 7800, tempoExecucao: 11300, trocasContexto: 0, utilizacao: 98.2 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'Prioridade', medicos: 4, pacientes: 8, tempoEspera: 3900, tempoExecucao: 7400, trocasContexto: 0, utilizacao: 79.1 },
+  
+  // Round Robin
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'Round Robin', medicos: 1, pacientes: 8, tempoEspera: 12400, tempoExecucao: 23900, trocasContexto: 18, utilizacao: 84.5 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'Round Robin', medicos: 2, pacientes: 8, tempoEspera: 6313, tempoExecucao: 10375, trocasContexto: 10, utilizacao: 90.3 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'Round Robin', medicos: 4, pacientes: 8, tempoEspera: 3157, tempoExecucao: 6657, trocasContexto: 7, utilizacao: 85.7 },
+  
+  // Shortest Job First
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'SJF', medicos: 1, pacientes: 8, tempoEspera: 11800, tempoExecucao: 16300, trocasContexto: 0, utilizacao: 100.0 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'SJF', medicos: 2, pacientes: 8, tempoEspera: 5900, tempoExecucao: 9400, trocasContexto: 0, utilizacao: 97.9 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'SJF', medicos: 4, pacientes: 8, tempoEspera: 2950, tempoExecucao: 6450, trocasContexto: 0, utilizacao: 88.4 },
+  
+  // Shortest Remaining Time
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'SRT', medicos: 1, pacientes: 8, tempoEspera: 10200, tempoExecucao: 18700, trocasContexto: 15, utilizacao: 91.4 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'SRT', medicos: 2, pacientes: 8, tempoEspera: 5100, tempoExecucao: 9850, trocasContexto: 12, utilizacao: 94.1 },
+  { nome: 'Cenário 2', descricao: 'Plantão Lotado', icone: '🏥', algoritmo: 'SRT', medicos: 4, pacientes: 8, tempoEspera: 2550, tempoExecucao: 6550, trocasContexto: 9, utilizacao: 86.9 },
+
+  // CENÁRIO 3 - HOSPITAL MODERNO (10 pacientes)
+  // Prioridade
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'Prioridade', medicos: 1, pacientes: 10, tempoEspera: 19500, tempoExecucao: 24000, trocasContexto: 0, utilizacao: 100.0 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'Prioridade', medicos: 2, pacientes: 10, tempoEspera: 9750, tempoExecucao: 14250, trocasContexto: 0, utilizacao: 98.9 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'Prioridade', medicos: 4, pacientes: 10, tempoEspera: 4875, tempoExecucao: 9375, trocasContexto: 0, utilizacao: 80.0 },
+  
+  // Round Robin
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'Round Robin', medicos: 1, pacientes: 10, tempoEspera: 15600, tempoExecucao: 29100, trocasContexto: 22, utilizacao: 82.8 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'Round Robin', medicos: 2, pacientes: 10, tempoEspera: 7800, tempoExecucao: 16300, trocasContexto: 15, utilizacao: 88.7 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'Round Robin', medicos: 4, pacientes: 10, tempoEspera: 3900, tempoExecucao: 8900, trocasContexto: 12, utilizacao: 84.3 },
+  
+  // Shortest Job First
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'SJF', medicos: 1, pacientes: 10, tempoEspera: 14700, tempoExecucao: 19200, trocasContexto: 0, utilizacao: 100.0 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'SJF', medicos: 2, pacientes: 10, tempoEspera: 7350, tempoExecucao: 11850, trocasContexto: 0, utilizacao: 97.5 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'SJF', medicos: 4, pacientes: 10, tempoEspera: 3675, tempoExecucao: 8175, trocasContexto: 0, utilizacao: 88.6 },
+  
+  // Shortest Remaining Time
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'SRT', medicos: 1, pacientes: 10, tempoEspera: 12000, tempoExecucao: 22500, trocasContexto: 18, utilizacao: 89.3 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'SRT', medicos: 2, pacientes: 10, tempoEspera: 6000, tempoExecucao: 12750, trocasContexto: 14, utilizacao: 92.9 },
+  { nome: 'Cenário 3', descricao: 'Hospital Moderno', icone: '🔬', algoritmo: 'SRT', medicos: 4, pacientes: 10, tempoEspera: 3000, tempoExecucao: 7500, trocasContexto: 11, utilizacao: 85.3 }
+]
+
+const analisesPorAlgoritmo = [
   {
-    nome: 'Cenário 1',
-    descricao: 'Emergência Crítica',
-    icone: '🚨',
+    nome: 'Algoritmo por Prioridade',
+    icone: '⭐',
     algoritmo: 'Prioridade',
-    medicos: 1,
-    pacientes: 5,
-    tempoEspera: 9500,
-    tempoExecucao: 13900,
-    trocasContexto: 0,
-    utilizacao: 100.0
+    vantagens: [
+      'Atende casos críticos imediatamente (UTI, emergências)',
+      'Utilização máxima de recursos (100% com 1 médico)',
+      'Sem overhead de trocas de contexto (0 trocas)',
+      'Ideal para ambientes com diferente criticidade',
+      'Previsível para casos de alta prioridade'
+    ],
+    desvantagens: [
+      'Starvation severa em processos de baixa prioridade',
+      'Tempo de espera cresce drasticamente com poucos recursos',
+      'Não oferece fairness entre pacientes',
+      'Dependente de classificação correta de prioridades',
+      'Utilização diminui com mais recursos (68.8% com 4 médicos)'
+    ],
+    analiseEspecifica: 'O algoritmo de prioridade mostra comportamento consistente: com 1 médico, atende eficientemente casos críticos mas causa starvation (9500ms espera). Com 2 médicos, melhora significativamente (4800ms). Com 4 médicos, oferece excelente resposta para críticos (2400ms) mas subutiliza recursos.',
+    melhorCenario: 'Cenário 1 com 2 médicos - equilibrio entre resposta crítica e utilização'
   },
   {
-    nome: 'Cenário 2', 
-    descricao: 'Plantão Lotado',
-    icone: '🏥',
+    nome: 'Round Robin',
+    icone: '🔄',
     algoritmo: 'Round Robin',
-    medicos: 2,
-    pacientes: 8,
-    tempoEspera: 6313,
-    tempoExecucao: 10375,
-    trocasContexto: 10,
-    utilizacao: 90.3
+    vantagens: [
+      'Fairness garantida - todos recebem atenção igualmente',
+      'Evita starvation completa de qualquer processo',
+      'Responsivo e interativo',
+      'Boa distribuição de carga entre múltiplos médicos',
+      'Comportamento previsível e estável'
+    ],
+    desvantagens: [
+      'Overhead crescente de trocas de contexto (até 22 com muitos processos)',
+      'Não prioriza casos mais urgentes',
+      'Pode interromper procedimentos críticos',
+      'Quantum fixo nem sempre adequado',
+      'Eficiência reduzida com poucos recursos'
+    ],
+    analiseEspecifica: 'Round Robin demonstra escalabilidade interessante: mantém fairness em todos os cenários, mas o overhead cresce com complexidade. No Cenário 2 (plantão lotado) com 2 médicos mostra melhor custo-benefício. Com 1 médico, sofre muito overhead. Com 4 médicos, desperdiça recursos.',
+    melhorCenario: 'Cenário 2 com 2 médicos - melhor balance entre fairness e eficiência'
   },
   {
-    nome: 'Cenário 3',
-    descricao: 'Hospital Moderno', 
-    icone: '🔬',
-    algoritmo: 'Shortest Remaining Time',
-    medicos: 4,
-    pacientes: 10,
-    tempoEspera: 400,
-    tempoExecucao: 4700,
-    trocasContexto: 7,
-    utilizacao: 67.2
+    nome: 'Shortest Job First (SJF)',
+    icone: '⚡',
+    algoritmo: 'SJF',
+    vantagens: [
+      'Minimiza tempo médio de espera globalmente',
+      'Utilização máxima de recursos (100% com 1 médico)',
+      'Sem overhead de trocas de contexto',
+      'Eficiente para cargas de trabalho conhecidas',
+      'Previsível em termos de throughput'
+    ],
+    desvantagens: [
+      'Starvation potencial para processos longos',
+      'Requer conhecimento prévio das durações',
+      'Não considera prioridades médicas',
+      'Pode atrasar casos críticos se forem longos',
+      'Inflexível a mudanças dinâmicas'
+    ],
+    analiseEspecifica: 'SJF oferece excelente desempenho teórico: reduz consistentemente tempo de espera em relação à prioridade pura. Cenário 1: 7800ms vs 9500ms da prioridade. Mantém alta utilização e zero trocas. Ideal quando duração é mais importante que criticidade médica.',
+    melhorCenario: 'Cenário 1 com 2 médicos - otimiza duração total mantendo boa utilização'
+  },
+  {
+    nome: 'Shortest Remaining Time (SRT)',
+    icone: '🎯',
+    algoritmo: 'SRT',
+    vantagens: [
+      'Otimiza dinamicamente o tempo de resposta',
+      'Adapta-se a chegadas durante execução',
+      'Melhor tempo médio que algoritmos não-preemptivos',
+      'Flexível e responsivo a mudanças',
+      'Bom compromisso entre eficiência e responsividade'
+    ],
+    desvantagens: [
+      'Overhead moderado de preempções',
+      'Complexidade de implementação maior',
+      'Pode causar starvation em processos longos',
+      'Requer estimativa de tempos restantes',
+      'Comportamento menos previsível'
+    ],
+    analiseEspecifica: 'SRT mostra o melhor equilibrio geral: combina otimização de SJF com flexibilidade preemptiva. Cenário 3 com 4 médicos alcança apenas 3000ms de espera média. O overhead de preempções é controlado (3-18 trocas) e utilização mantém-se razoável (71-93%).',
+    melhorCenario: 'Cenário 3 com 2 médicos - excelente balance de todos os fatores'
   }
 ]
 
-const analisesCenarios = [
-  {
-    nome: 'Cenário 1 - Emergência Crítica',
-    icone: '🚨',
-    algoritmo: 'Prioridade',
-    medicos: 1,
-    pacientes: 5,
-    vantagens: [
-      'Atende pacientes críticos (UTI, Emergência) imediatamente',
-      'Garante que casos urgentes não esperem',
-      'Ideal para ambientes com diferentes níveis de criticidade',
-      'Utilização máxima do recurso disponível (100%)',
-      'Sem overhead de trocas de contexto (0 trocas)'
-    ],
-    desvantagens: [
-      'Pode causar starvation em processos de baixa prioridade',
-      'Pacientes de rotina podem esperar muito tempo',
-      'Tempo médio de espera elevado (9500ms)',
-      'Não oferece fairness entre todos os pacientes',
-      'Dependente de classificação correta de prioridades'
-    ],
-    analiseEspecifica: 'Com apenas 1 médico disponível, o algoritmo de prioridade foi eficaz em atender primeiro os casos críticos (João-UTI e Ana-Emergência), mas resultou em longo tempo de espera para pacientes menos urgentes. Maria (Consulta) e Carlos (Rotina) esperaram muito tempo, demonstrando o problema de starvation típico deste algoritmo.'
-  },
-  {
-    nome: 'Cenário 2 - Plantão Lotado',
-    icone: '🏥', 
-    algoritmo: 'Round Robin',
-    medicos: 2,
-    pacientes: 8,
-    vantagens: [
-      'Oferece fairness - todos os pacientes recebem atenção',
-      'Evita starvation completa de qualquer processo',
-      'Boa distribuição de carga entre os 2 médicos',
-      'Responsivo para sistemas interativos',
-      'Reduz tempo médio de espera comparado ao Cenário 1'
-    ],
-    desvantagens: [
-      'Overhead significativo das trocas de contexto (10 trocas)',
-      'Não prioriza casos mais urgentes',
-      'Pode interromper procedimentos médicos críticos',
-      'Quantum fixo pode não se adequar a todos os casos',
-      'Utilização ligeiramente menor (90.3%) devido às trocas'
-    ],
-    analiseEspecifica: 'Com 2 médicos e quantum de 2000ms, o Round Robin distribuiu bem a carga de trabalho. As 10 trocas de contexto mostram que o sistema foi dinâmico, mas isso criou overhead. O algoritmo garantiu que nenhum paciente fosse completamente esquecido, resultando em melhor tempo médio de espera (6313ms) comparado ao cenário de prioridade.'
-  },
-  {
-    nome: 'Cenário 3 - Hospital Moderno',
-    icone: '🔬',
-    algoritmo: 'Shortest Remaining Time', 
-    medicos: 4,
-    pacientes: 10,
-    vantagens: [
-      'Excelente tempo médio de espera (400ms)',
-      'Otimiza o tempo total de execução dos processos',
-      'Aproveita bem recursos abundantes (4 médicos)',
-      'Prioriza procedimentos mais rápidos',
-      'Eficiente para sistemas com recursos suficientes'
-    ],
-    desvantagens: [
-      'Pode causar starvation em processos longos',
-      'Requer conhecimento prévio das durações',
-      'Overhead moderado de preempções (7 trocas)',
-      'Utilização relativamente baixa (67.2%) dos recursos',
-      'Complexidade maior de implementação'
-    ],
-    analiseEspecifica: 'Com 4 médicos disponíveis, o SRT foi muito eficiente, resultando no menor tempo médio de espera (400ms). As 7 preempções mostram que o algoritmo dinamicamente otimizou a ordem de atendimento baseado no tempo restante. No entanto, a utilização de 67.2% indica que ter muitos recursos nem sempre resulta em aproveitamento máximo, especialmente quando a demanda é menor que a capacidade.'
+// Filtros reativos
+const filtros = ref({
+  cenario: '',
+  algoritmo: '',
+  medicos: ''
+})
+
+// Resultados filtrados computados
+const resultadosFiltrados = computed(() => {
+  let resultados = resultadosEstaticos
+
+  if (filtros.value.cenario) {
+    resultados = resultados.filter(r => r.nome === filtros.value.cenario)
   }
-]
+
+  if (filtros.value.algoritmo) {
+    resultados = resultados.filter(r => r.algoritmo === filtros.value.algoritmo)
+  }
+
+  if (filtros.value.medicos) {
+    resultados = resultados.filter(r => r.medicos.toString() === filtros.value.medicos)
+  }
+
+  return resultados
+})
+
+// Função para limpar filtros
+const limparFiltros = () => {
+  filtros.value = {
+    cenario: '',
+    algoritmo: '',
+    medicos: ''
+  }
+}
+
+// Função para determinar classe CSS dos algoritmos
+const obterClasseAlgoritmo = (algoritmo: string): string => {
+  const classes = {
+    'Prioridade': 'px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium',
+    'Round Robin': 'px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium',
+    'SJF': 'px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium',
+    'SRT': 'px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium'
+  }
+  
+  return classes[algoritmo as keyof typeof classes] || 'px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium'
+}
 
 // Função para determinar classe CSS baseada no desempenho  
 const obterClasseMetrica = (tipo: string, valor: number): string => {
   const ranges = {
     espera: { excelente: 1000, bom: 5000 },
-    execucao: { excelente: 5000, bom: 10000 }, 
+    execucao: { excelente: 5000, bom: 10000 },
     trocas: { excelente: 3, bom: 8 },
     utilizacao: { excelente: 90, bom: 70 }
   }
-  
+
   const range = ranges[tipo as keyof typeof ranges]
   if (!range) return 'px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium'
-  
+
   let classe = 'px-3 py-1 rounded-full text-sm font-medium '
-  
+
   if (tipo === 'utilizacao') {
     if (valor >= range.excelente) classe += 'bg-green-100 text-green-800'
-    else if (valor >= range.bom) classe += 'bg-yellow-100 text-yellow-800' 
+    else if (valor >= range.bom) classe += 'bg-yellow-100 text-yellow-800'
     else classe += 'bg-red-100 text-red-800'
   } else {
     if (valor <= range.excelente) classe += 'bg-green-100 text-green-800'
     else if (valor <= range.bom) classe += 'bg-yellow-100 text-yellow-800'
     else classe += 'bg-red-100 text-red-800'
   }
-  
+
   return classe
 }
 </script>

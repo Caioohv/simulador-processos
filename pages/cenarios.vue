@@ -4,10 +4,10 @@
     <!-- Header -->
     <div class="text-center mb-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-4">
-        🎭 Cenários do Trabalho
+        🎭 Cenários Expandidos do Trabalho
       </h1>
       <p class="text-lg text-gray-600">
-        Execute os 3 cenários específicos definidos no trabalho acadêmico
+        Matriz completa: 3 cenários × 4 algoritmos × 3 configurações de médicos = {{ cenarios.length }} cenários
       </p>
 
       <!-- Toggle Modo Tempo Real -->
@@ -39,6 +39,50 @@
       </div>
     </div>
 
+    <!-- Filtros dos Cenários -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">🔍 Filtros de Cenários</h2>
+      <div class="grid md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Cenário Base</label>
+          <select v-model="filtros.cenarioBase" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            <option value="">Todos os cenários</option>
+            <option value="1">Cenário 1 - Emergência Crítica</option>
+            <option value="2">Cenário 2 - Plantão Lotado</option>
+            <option value="3">Cenário 3 - Hospital Moderno</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Algoritmo</label>
+          <select v-model="filtros.algoritmo" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            <option value="">Todos os algoritmos</option>
+            <option value="Prioridade">Prioridade</option>
+            <option value="Round Robin">Round Robin</option>
+            <option value="Shortest Job First">Shortest Job First</option>
+            <option value="Shortest Remaining Time">Shortest Remaining Time</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Número de Médicos</label>
+          <select v-model="filtros.medicos" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            <option value="">Todas as configurações</option>
+            <option value="1">1 Médico</option>
+            <option value="2">2 Médicos</option>
+            <option value="4">4 Médicos</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button @click="limparFiltrosCenarios" 
+                  class="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-sm transition-colors">
+            Limpar Filtros
+          </button>
+        </div>
+      </div>
+      <div class="mt-3 text-sm text-gray-600">
+        Mostrando {{ cenariosFiltrados.length }} de {{ cenarios.length }} cenários
+      </div>
+    </div>
+
     <!-- Controles -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
       <div class="flex flex-wrap gap-4 items-center justify-between">
@@ -48,7 +92,7 @@
             class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors">
             {{ executando ? '⏳ Executando...' :
               executandoSequencia ? '📈 Executando Sequencialmente...' :
-                modoTempoReal ? '🎬 Executar Cenários Sequencialmente' : '🚀 Executar Todos os Cenários' }}
+                modoTempoReal ? `🎬 Executar ${cenariosFiltrados.length} Cenários` : `🚀 Executar ${cenariosFiltrados.length} Cenários` }}
           </button>
 
           <button @click="limparResultados"
@@ -168,7 +212,7 @@
 
     <!-- Cenários Individuais -->
     <div class="space-y-8 mb-8">
-      <div v-for="(cenario, index) in cenarios" :key="cenario.nome"
+      <div v-for="(cenario, index) in cenariosFiltrados" :key="cenario.nome"
         class="bg-white rounded-lg shadow-lg overflow-hidden">
         <!-- Header do Cenário -->
         <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white p-6">
@@ -663,6 +707,13 @@ const diagramasGanttCenarios = ref<Record<string, {
   timestampExecucao: number
 }>>({})
 
+// Filtros para os cenários
+const filtros = ref({
+  cenarioBase: '',
+  algoritmo: '',
+  medicos: ''
+})
+
 // Inicializar diagramas vazios para cada cenário
 const inicializarDiagramasCenarios = () => {
   console.log(`🔧 Inicializando diagramas para ${cenarios.length} cenários`)
@@ -720,6 +771,35 @@ const limparCoresProcessos = () => {
 
 // Dados
 const cenarios = criarCenarios()
+
+// Cenários filtrados
+const cenariosFiltrados = computed(() => {
+  let resultado = cenarios
+
+  if (filtros.value.cenarioBase) {
+    resultado = resultado.filter(c => c.nome.includes(`Cenário ${filtros.value.cenarioBase}`))
+  }
+
+  if (filtros.value.algoritmo) {
+    resultado = resultado.filter(c => c.nome.includes(filtros.value.algoritmo))
+  }
+
+  if (filtros.value.medicos) {
+    const numMedicos = parseInt(filtros.value.medicos)
+    resultado = resultado.filter(c => c.configuracao.numeroMedicos === numMedicos)
+  }
+
+  return resultado
+})
+
+// Função para limpar filtros
+const limparFiltrosCenarios = () => {
+  filtros.value = {
+    cenarioBase: '',
+    algoritmo: '',
+    medicos: ''
+  }
+}
 
 // Interceptar console.log para mostrar na interface
 const originalConsoleLog = console.log
@@ -1334,11 +1414,11 @@ const executarTodosCenarios = async () => {
     consoleOutput.value = []
 
     try {
-      for (let i = 0; i < cenarios.length; i++) {
+      for (let i = 0; i < cenariosFiltrados.value.length; i++) {
         cenarioAtualIndex.value = i
-        const cenario = cenarios[i]
+        const cenario = cenariosFiltrados.value[i]
 
-        console.log(`🎭 Iniciando cenário ${i + 1}: ${cenario.nome}`)
+        console.log(`🎭 Iniciando cenário ${i + 1}/${cenariosFiltrados.value.length}: ${cenario.nome}`)
 
         // Limpar cores antes de cada cenário
         limparCoresProcessos()
@@ -1405,7 +1485,7 @@ const executarTodosCenarios = async () => {
         })
 
         // Pausa entre cenários
-        if (i < cenarios.length - 1) {
+        if (i < cenariosFiltrados.value.length - 1) {
           console.log(`⏳ Aguardando para próximo cenário...`)
           await new Promise(resolve => setTimeout(resolve, 2000))
         }
