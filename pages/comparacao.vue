@@ -4,504 +4,354 @@
     <!-- Header -->
     <div class="text-center mb-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-4">
-        📊 Comparação de Algoritmos
+        📊 Análise Comparativa dos Cenários
       </h1>
       <p class="text-lg text-gray-600">
-        Compare todos os algoritmos de escalonamento com os mesmos processos
+        Análise detalhada dos resultados obtidos nos três cenários executados
       </p>
     </div>
 
-    <!-- Configuração da Comparação -->
+    <!-- Resumo dos Resultados -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <h2 class="text-xl font-bold text-gray-800 mb-4">⚙️ Configuração da Comparação</h2>
-
-      <div class="grid md:grid-cols-3 gap-6 mb-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Número de Médicos (CPUs)
-          </label>
-          <div class="flex gap-2">
-            <button v-for="num in [1, 2, 4]" :key="num" @click="numeroMedicos = num" :class="[
-              'flex-1 py-2 px-4 rounded-lg border transition-colors',
-              numeroMedicos === num
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            ]">
-              {{ num }}
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Quantum para Round Robin (ms)
-          </label>
-          <input v-model.number="quantum" type="number" min="100" max="10000" step="100"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Conjunto de Processos
-          </label>
-          <select v-model="conjuntoEscolhido"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option value="exemplo">Processos Exemplo</option>
-            <option value="emergencia">Cenário Emergência</option>
-            <option value="lotado">Cenário Lotado</option>
-            <option value="moderno">Cenário Moderno</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="flex gap-4">
-        <button @click="executarComparacao" :disabled="executando"
-          class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg transition-colors font-medium">
-          {{ executando ? '⏳ Comparando...' : '🚀 Executar Comparação' }}
-        </button>
-
-        <button @click="limparResultados" :disabled="!resultados || Object.keys(resultados).length === 0"
-          class="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg transition-colors">
-          🗑️ Limpar Resultados
-        </button>
-      </div>
-    </div>
-
-    <!-- Processos Utilizados -->
-    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">👥 Processos Utilizados na Comparação</h3>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div v-for="processo in processosAtivos" :key="processo.pid" class="bg-gray-50 rounded-lg p-3">
-          <div class="font-medium text-sm">{{ processo.nome }}</div>
-          <div class="text-xs text-gray-600">
-            Chegada: {{ processo.ingresso }}ms |
-            Duração: {{ processo.duracao }}ms |
-            Prioridade: {{ processo.prioridade }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Resultados da Comparação -->
-    <div v-if="resultados && Object.keys(resultados).length > 0">
-      <!-- Tabela Comparativa -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">📈 Tabela Comparativa</h3>
-
-        <div class="overflow-x-auto">
-          <table class="min-w-full">
-            <thead>
-              <tr class="border-b-2 border-gray-200">
-                <th class="text-left py-3 px-4 font-semibold text-gray-700">Algoritmo</th>
-                <th class="text-center py-3 px-4 font-semibold text-gray-700">Tempo Médio Espera</th>
-                <th class="text-center py-3 px-4 font-semibold text-gray-700">Tempo Médio Turnaround</th>
-                <th class="text-center py-3 px-4 font-semibold text-gray-700">Trocas Contexto</th>
-                <th class="text-center py-3 px-4 font-semibold text-gray-700">Utilização CPU</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="[algoritmo, resultado] in Object.entries(resultados)" :key="algoritmo"
-                class="border-b hover:bg-gray-50">
-                <td class="py-3 px-4">
-                  <div class="flex items-center gap-2">
-                    <span class="text-2xl">{{ obterIconeAlgoritmo(algoritmo) }}</span>
-                    <span class="font-medium">{{ formatarNomeAlgoritmo(algoritmo) }}</span>
+      <h2 class="text-xl font-bold text-gray-800 mb-6">📈 Resumo dos Resultados</h2>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="border-b-2 border-gray-200">
+              <th class="text-left py-3 px-4 font-semibold text-gray-700">Cenário</th>
+              <th class="text-center py-3 px-4 font-semibold text-gray-700">Algoritmo</th>
+              <th class="text-center py-3 px-4 font-semibold text-gray-700">Médicos</th>
+              <th class="text-center py-3 px-4 font-semibold text-gray-700">Pacientes</th>
+              <th class="text-center py-3 px-4 font-semibold text-gray-700">Tempo Médio Espera</th>
+              <th class="text-center py-3 px-4 font-semibold text-gray-700">Tempo Médio Execução</th>
+              <th class="text-center py-3 px-4 font-semibold text-gray-700">Trocas Contexto</th>
+              <th class="text-center py-3 px-4 font-semibold text-gray-700">Utilização</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="resultado in resultadosEstaticos" :key="resultado.nome" class="border-b hover:bg-gray-50">
+              <td class="py-3 px-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">{{ resultado.icone }}</span>
+                  <div>
+                    <div class="font-medium">{{ resultado.nome }}</div>
+                    <div class="text-xs text-gray-500">{{ resultado.descricao }}</div>
                   </div>
-                </td>
-                <td class="text-center py-3 px-4">
-                  <span :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    obterClasseMetrica('espera', algoritmo)
-                  ]">
-                    {{ Math.round(resultado.metricas.tempoMedioEspera) }}ms
-                  </span>
-                </td>
-                <td class="text-center py-3 px-4">
-                  <span :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    obterClasseMetrica('turnaround', algoritmo)
-                  ]">
-                    {{ Math.round(resultado.metricas.tempoMedioTurnaround) }}ms
-                  </span>
-                </td>
-                <td class="text-center py-3 px-4">
-                  <span :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    obterClasseMetrica('trocas', algoritmo)
-                  ]">
-                    {{ resultado.metricas.numeroTrocasContexto }}
-                  </span>
-                </td>
-                <td class="text-center py-3 px-4">
-                  <span :class="[
-                    'px-3 py-1 rounded-full text-sm font-medium',
-                    obterClasseMetrica('cpu', algoritmo)
-                  ]">
-                    {{ resultado.metricas.utilizacaoMediaCPU.toFixed(1) }}%
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </td>
+              <td class="text-center py-3 px-4">
+                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                  {{ resultado.algoritmo }}
+                </span>
+              </td>
+              <td class="text-center py-3 px-4 font-medium">{{ resultado.medicos }}</td>
+              <td class="text-center py-3 px-4 font-medium">{{ resultado.pacientes }}</td>
+              <td class="text-center py-3 px-4">
+                <span :class="obterClasseMetrica('espera', resultado.tempoEspera)">
+                  {{ resultado.tempoEspera }}ms
+                </span>
+              </td>
+              <td class="text-center py-3 px-4">
+                <span :class="obterClasseMetrica('execucao', resultado.tempoExecucao)">
+                  {{ resultado.tempoExecucao }}ms
+                </span>
+              </td>
+              <td class="text-center py-3 px-4">
+                <span :class="obterClasseMetrica('trocas', resultado.trocasContexto)">
+                  {{ resultado.trocasContexto }}
+                </span>
+              </td>
+              <td class="text-center py-3 px-4">
+                <span :class="obterClasseMetrica('utilizacao', resultado.utilizacao)">
+                  {{ resultado.utilizacao }}%
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      <!-- Melhores Desempenhos -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">🏆 Melhores Desempenhos</h3>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-green-50 rounded-lg p-4 text-center">
-            <div class="text-2xl mb-2">⏱️</div>
-            <div class="text-sm text-gray-600 mb-1">Menor Tempo de Espera</div>
-            <div class="font-bold text-green-700">{{ melhorEspera.nome }}</div>
-            <div class="text-sm text-green-600">{{ Math.round(melhorEspera.valor) }}ms</div>
-          </div>
-
-          <div class="bg-blue-50 rounded-lg p-4 text-center">
-            <div class="text-2xl mb-2">🏃</div>
-            <div class="text-sm text-gray-600 mb-1">Menor Turnaround</div>
-            <div class="font-bold text-blue-700">{{ melhorTurnaround.nome }}</div>
-            <div class="text-sm text-blue-600">{{ Math.round(melhorTurnaround.valor) }}ms</div>
-          </div>
-
-          <div class="bg-purple-50 rounded-lg p-4 text-center">
-            <div class="text-2xl mb-2">💻</div>
-            <div class="text-sm text-gray-600 mb-1">Melhor Utilização CPU</div>
-            <div class="font-bold text-purple-700">{{ melhorCPU.nome }}</div>
-            <div class="text-sm text-purple-600">{{ melhorCPU.valor.toFixed(1) }}%</div>
-          </div>
-
-          <div class="bg-yellow-50 rounded-lg p-4 text-center">
-            <div class="text-2xl mb-2">🔀</div>
-            <div class="text-sm text-gray-600 mb-1">Menos Trocas Contexto</div>
-            <div class="font-bold text-yellow-700">{{ menorTrocas.nome }}</div>
-            <div class="text-sm text-yellow-600">{{ menorTrocas.valor }}</div>
+    <!-- Análises por Cenário -->
+    <div class="space-y-8 mb-8">
+      <div v-for="cenario in analisesCenarios" :key="cenario.nome" class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="text-3xl">{{ cenario.icone }}</span>
+          <div>
+            <h3 class="text-xl font-bold text-gray-800">{{ cenario.nome }}</h3>
+            <p class="text-gray-600">{{ cenario.algoritmo }} • {{ cenario.medicos }} médico(s) • {{ cenario.pacientes }} paciente(s)</p>
           </div>
         </div>
-      </div>
-
-      <!-- Gráficos Comparativos -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Gráficos Comparativos</h3>
 
         <div class="grid md:grid-cols-2 gap-8">
-          <!-- Gráfico de Barras - Tempo de Espera -->
-          <div>
-            <h4 class="font-medium text-gray-700 mb-3">Tempo Médio de Espera</h4>
-            <div class="space-y-2">
-              <div v-for="[algoritmo, resultado] in Object.entries(resultados)" :key="`espera-${algoritmo}`"
-                class="flex items-center gap-3">
-                <div class="w-24 text-sm text-gray-600 truncate">
-                  {{ formatarNomeAlgoritmo(algoritmo) }}
-                </div>
-                <div class="flex-1 bg-gray-200 rounded-full h-6 relative">
-                  <div class="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
-                    :style="{ width: `${(resultado.metricas.tempoMedioEspera / maxEspera) * 100}%` }">
-                    <span class="text-white text-xs font-medium">
-                      {{ Math.round(resultado.metricas.tempoMedioEspera) }}ms
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <!-- Vantagens -->
+          <div class="bg-green-50 rounded-lg p-4">
+            <h4 class="font-semibold text-green-800 mb-3 flex items-center gap-2">
+              <span>✅</span> Vantagens do {{ cenario.algoritmo }}
+            </h4>
+            <ul class="space-y-2">
+              <li v-for="vantagem in cenario.vantagens" :key="vantagem" class="flex items-start gap-2 text-sm text-green-700">
+                <span class="text-green-500 mt-0.5">•</span>
+                <span>{{ vantagem }}</span>
+              </li>
+            </ul>
           </div>
 
-          <!-- Gráfico de Barras - Utilização CPU -->
-          <div>
-            <h4 class="font-medium text-gray-700 mb-3">Utilização da CPU</h4>
-            <div class="space-y-2">
-              <div v-for="[algoritmo, resultado] in Object.entries(resultados)" :key="`cpu-${algoritmo}`"
-                class="flex items-center gap-3">
-                <div class="w-24 text-sm text-gray-600 truncate">
-                  {{ formatarNomeAlgoritmo(algoritmo) }}
-                </div>
-                <div class="flex-1 bg-gray-200 rounded-full h-6 relative">
-                  <div class="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2"
-                    :style="{ width: `${resultado.metricas.utilizacaoMediaCPU}%` }">
-                    <span class="text-white text-xs font-medium">
-                      {{ resultado.metricas.utilizacaoMediaCPU.toFixed(1) }}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <!-- Desvantagens -->
+          <div class="bg-red-50 rounded-lg p-4">
+            <h4 class="font-semibold text-red-800 mb-3 flex items-center gap-2">
+              <span>❌</span> Desvantagens do {{ cenario.algoritmo }}
+            </h4>
+            <ul class="space-y-2">
+              <li v-for="desvantagem in cenario.desvantagens" :key="desvantagem" class="flex items-start gap-2 text-sm text-red-700">
+                <span class="text-red-500 mt-0.5">•</span>
+                <span>{{ desvantagem }}</span>
+              </li>
+            </ul>
           </div>
         </div>
-      </div>
 
-      <!-- Análise Detalhada -->
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">🔍 Análise Detalhada</h3>
-
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="font-medium text-gray-700 mb-3">📋 Observações</h4>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li v-for="observacao in observacoes" :key="observacao" class="flex items-start gap-2">
-                <span class="text-blue-500 mt-1">•</span>
-                <span>{{ observacao }}</span>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-medium text-gray-700 mb-3">💡 Recomendações</h4>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li v-for="recomendacao in recomendacoes" :key="recomendacao" class="flex items-start gap-2">
-                <span class="text-green-500 mt-1">•</span>
-                <span>{{ recomendacao }}</span>
-              </li>
-            </ul>
-          </div>
+        <!-- Análise Específica do Cenário -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+          <h4 class="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+            <span>🔍</span> Análise Específica neste Cenário
+          </h4>
+          <p class="text-sm text-blue-700">{{ cenario.analiseEspecifica }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Estado Vazio -->
-    <div v-else class="bg-white rounded-lg shadow-lg p-12 text-center">
-      <div class="text-6xl mb-4">📊</div>
-      <h3 class="text-xl font-bold text-gray-800 mb-2">Nenhuma comparação executada</h3>
-      <p class="text-gray-600 mb-6">Configure os parâmetros acima e execute uma comparação para ver os resultados</p>
-      <button @click="executarComparacao" :disabled="executando"
-        class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg transition-colors font-medium">
-        {{ executando ? '⏳ Comparando...' : '🚀 Executar Primeira Comparação' }}
-      </button>
+    <!-- Comparação Geral -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">🎯 Comparação Geral dos Algoritmos</h2>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Eficiência -->
+        <div class="text-center">
+          <div class="text-3xl mb-3">⚡</div>
+          <h3 class="font-semibold text-gray-800 mb-2">Mais Eficiente</h3>
+          <div class="bg-green-100 text-green-800 px-3 py-2 rounded-full text-sm font-medium">
+            Shortest Remaining Time
+          </div>
+          <p class="text-xs text-gray-600 mt-2">Cenário 3: 400ms tempo médio de espera</p>
+        </div>
+
+        <!-- Balanceamento -->
+        <div class="text-center">
+          <div class="text-3xl mb-3">⚖️</div>
+          <h3 class="font-semibold text-gray-800 mb-2">Mais Balanceado</h3>
+          <div class="bg-blue-100 text-blue-800 px-3 py-2 rounded-full text-sm font-medium">
+            Round Robin
+          </div>
+          <p class="text-xs text-gray-600 mt-2">Cenário 2: Distribuição justa entre processos</p>
+        </div>
+
+        <!-- Priorização -->
+        <div class="text-center">
+          <div class="text-3xl mb-3">🏆</div>
+          <h3 class="font-semibold text-gray-800 mb-2">Melhor Priorização</h3>
+          <div class="bg-purple-100 text-purple-800 px-3 py-2 rounded-full text-sm font-medium">
+            Prioridade
+          </div>
+          <p class="text-xs text-gray-600 mt-2">Cenário 1: Atende críticos primeiro</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conclusões e Recomendações -->
+    <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg shadow-lg p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">📚 Conclusões e Recomendações</h2>
+      
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Quando usar cada algoritmo -->
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-4">🎯 Quando Usar Cada Algoritmo</h3>
+          <div class="space-y-3">
+            <div class="bg-white rounded-lg p-3 border-l-4 border-purple-500">
+              <h4 class="font-medium text-purple-800">Prioridade</h4>
+              <p class="text-sm text-gray-600">Sistemas com diferentes níveis de criticidade (hospitais, sistemas de emergência)</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 border-l-4 border-blue-500">
+              <h4 class="font-medium text-blue-800">Round Robin</h4>
+              <p class="text-sm text-gray-600">Sistemas interativos onde a justiça é importante (sistemas multi-usuário)</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 border-l-4 border-green-500">
+              <h4 class="font-medium text-green-800">Shortest Remaining Time</h4>
+              <p class="text-sm text-gray-600">Sistemas com recursos abundantes e processos de duração conhecida</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lições aprendidas -->
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-4">💡 Principais Lições</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2 text-sm text-gray-700">
+              <span class="text-green-500 mt-0.5">•</span>
+              <span>Mais recursos (médicos) nem sempre significam melhor desempenho relativo</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-700">
+              <span class="text-blue-500 mt-0.5">•</span>
+              <span>Algoritmos preemptivos oferecem melhor responsividade mas com overhead</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-700">
+              <span class="text-purple-500 mt-0.5">•</span>
+              <span>O contexto da aplicação é fundamental na escolha do algoritmo</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-700">
+              <span class="text-yellow-500 mt-0.5">•</span>
+              <span>Sistemas críticos necessitam de algoritmos que priorizem emergências</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useSimuladorHospital } from '~/composables/useSimuladorHospital'
-import type { IProcesso, ResultadoSimulacao } from '../types/index'
-
 // Meta tags
 useHead({
-  title: 'Comparação de Algoritmos - Hospital Digital',
+  title: 'Análise Comparativa - Hospital Digital',
   meta: [
-    { name: 'description', content: 'Compare todos os algoritmos de escalonamento de processos' }
+    { name: 'description', content: 'Análise detalhada dos resultados dos cenários de escalonamento' }
   ]
 })
 
-// Composables
-const { compararAlgoritmos, criarProcessosExemplo, criarCenarios } = useSimuladorHospital()
-
-// Estado reativo  
-const executando = ref(false)
-const numeroMedicos = ref(1)
-const quantum = ref(2000)
-const conjuntoEscolhido = ref('exemplo')
-const resultados = ref<Record<string, ResultadoSimulacao> | null>(null)
-
-// Computed
-const processosAtivos = computed(() => {
-  switch (conjuntoEscolhido.value) {
-    case 'exemplo':
-      return criarProcessosExemplo()
-    case 'emergencia':
-      return criarCenarios()[0].configuracao.processos.map((p, i) => ({ ...p, pid: i + 1 }))
-    case 'lotado':
-      return criarCenarios()[1].configuracao.processos.map((p, i) => ({ ...p, pid: i + 1 }))
-    case 'moderno':
-      return criarCenarios()[2].configuracao.processos.map((p, i) => ({ ...p, pid: i + 1 }))
-    default:
-      return criarProcessosExemplo()
+// Dados estáticos baseados nos resultados fornecidos
+const resultadosEstaticos = [
+  {
+    nome: 'Cenário 1',
+    descricao: 'Emergência Crítica',
+    icone: '🚨',
+    algoritmo: 'Prioridade',
+    medicos: 1,
+    pacientes: 5,
+    tempoEspera: 9500,
+    tempoExecucao: 13900,
+    trocasContexto: 0,
+    utilizacao: 100.0
+  },
+  {
+    nome: 'Cenário 2', 
+    descricao: 'Plantão Lotado',
+    icone: '🏥',
+    algoritmo: 'Round Robin',
+    medicos: 2,
+    pacientes: 8,
+    tempoEspera: 6313,
+    tempoExecucao: 10375,
+    trocasContexto: 10,
+    utilizacao: 90.3
+  },
+  {
+    nome: 'Cenário 3',
+    descricao: 'Hospital Moderno', 
+    icone: '🔬',
+    algoritmo: 'Shortest Remaining Time',
+    medicos: 4,
+    pacientes: 10,
+    tempoEspera: 400,
+    tempoExecucao: 4700,
+    trocasContexto: 7,
+    utilizacao: 67.2
   }
-})
+]
 
-const melhorEspera = computed(() => {
-  if (!resultados.value) return { nome: '', valor: 0 }
-
-  const entries = Object.entries(resultados.value)
-  const melhor = entries.reduce((min, [nome, resultado]) =>
-    resultado.metricas.tempoMedioEspera < min.valor
-      ? { nome: formatarNomeAlgoritmo(nome), valor: resultado.metricas.tempoMedioEspera }
-      : min
-    , { nome: '', valor: Infinity })
-
-  return melhor
-})
-
-const melhorTurnaround = computed(() => {
-  if (!resultados.value) return { nome: '', valor: 0 }
-
-  const entries = Object.entries(resultados.value)
-  const melhor = entries.reduce((min, [nome, resultado]) =>
-    resultado.metricas.tempoMedioTurnaround < min.valor
-      ? { nome: formatarNomeAlgoritmo(nome), valor: resultado.metricas.tempoMedioTurnaround }
-      : min
-    , { nome: '', valor: Infinity })
-
-  return melhor
-})
-
-const melhorCPU = computed(() => {
-  if (!resultados.value) return { nome: '', valor: 0 }
-
-  const entries = Object.entries(resultados.value)
-  const melhor = entries.reduce((max, [nome, resultado]) =>
-    resultado.metricas.utilizacaoMediaCPU > max.valor
-      ? { nome: formatarNomeAlgoritmo(nome), valor: resultado.metricas.utilizacaoMediaCPU }
-      : max
-    , { nome: '', valor: 0 })
-
-  return melhor
-})
-
-const menorTrocas = computed(() => {
-  if (!resultados.value) return { nome: '', valor: 0 }
-
-  const entries = Object.entries(resultados.value)
-  const melhor = entries.reduce((min, [nome, resultado]) =>
-    resultado.metricas.numeroTrocasContexto < min.valor
-      ? { nome: formatarNomeAlgoritmo(nome), valor: resultado.metricas.numeroTrocasContexto }
-      : min
-    , { nome: '', valor: Infinity })
-
-  return melhor
-})
-
-const maxEspera = computed(() => {
-  if (!resultados.value) return 1
-
-  return Math.max(...Object.values(resultados.value).map(r => r.metricas.tempoMedioEspera))
-})
-
-const observacoes = computed(() => {
-  if (!resultados.value) return []
-
-  const obs = []
-  const algoritmos = Object.keys(resultados.value)
-
-  if (algoritmos.includes('shortest_job_first')) {
-    obs.push('SJF geralmente apresenta o menor tempo médio de espera para processos curtos')
+const analisesCenarios = [
+  {
+    nome: 'Cenário 1 - Emergência Crítica',
+    icone: '🚨',
+    algoritmo: 'Prioridade',
+    medicos: 1,
+    pacientes: 5,
+    vantagens: [
+      'Atende pacientes críticos (UTI, Emergência) imediatamente',
+      'Garante que casos urgentes não esperem',
+      'Ideal para ambientes com diferentes níveis de criticidade',
+      'Utilização máxima do recurso disponível (100%)',
+      'Sem overhead de trocas de contexto (0 trocas)'
+    ],
+    desvantagens: [
+      'Pode causar starvation em processos de baixa prioridade',
+      'Pacientes de rotina podem esperar muito tempo',
+      'Tempo médio de espera elevado (9500ms)',
+      'Não oferece fairness entre todos os pacientes',
+      'Dependente de classificação correta de prioridades'
+    ],
+    analiseEspecifica: 'Com apenas 1 médico disponível, o algoritmo de prioridade foi eficaz em atender primeiro os casos críticos (João-UTI e Ana-Emergência), mas resultou em longo tempo de espera para pacientes menos urgentes. Maria (Consulta) e Carlos (Rotina) esperaram muito tempo, demonstrando o problema de starvation típico deste algoritmo.'
+  },
+  {
+    nome: 'Cenário 2 - Plantão Lotado',
+    icone: '🏥', 
+    algoritmo: 'Round Robin',
+    medicos: 2,
+    pacientes: 8,
+    vantagens: [
+      'Oferece fairness - todos os pacientes recebem atenção',
+      'Evita starvation completa de qualquer processo',
+      'Boa distribuição de carga entre os 2 médicos',
+      'Responsivo para sistemas interativos',
+      'Reduz tempo médio de espera comparado ao Cenário 1'
+    ],
+    desvantagens: [
+      'Overhead significativo das trocas de contexto (10 trocas)',
+      'Não prioriza casos mais urgentes',
+      'Pode interromper procedimentos médicos críticos',
+      'Quantum fixo pode não se adequar a todos os casos',
+      'Utilização ligeiramente menor (90.3%) devido às trocas'
+    ],
+    analiseEspecifica: 'Com 2 médicos e quantum de 2000ms, o Round Robin distribuiu bem a carga de trabalho. As 10 trocas de contexto mostram que o sistema foi dinâmico, mas isso criou overhead. O algoritmo garantiu que nenhum paciente fosse completamente esquecido, resultando em melhor tempo médio de espera (6313ms) comparado ao cenário de prioridade.'
+  },
+  {
+    nome: 'Cenário 3 - Hospital Moderno',
+    icone: '🔬',
+    algoritmo: 'Shortest Remaining Time', 
+    medicos: 4,
+    pacientes: 10,
+    vantagens: [
+      'Excelente tempo médio de espera (400ms)',
+      'Otimiza o tempo total de execução dos processos',
+      'Aproveita bem recursos abundantes (4 médicos)',
+      'Prioriza procedimentos mais rápidos',
+      'Eficiente para sistemas com recursos suficientes'
+    ],
+    desvantagens: [
+      'Pode causar starvation em processos longos',
+      'Requer conhecimento prévio das durações',
+      'Overhead moderado de preempções (7 trocas)',
+      'Utilização relativamente baixa (67.2%) dos recursos',
+      'Complexidade maior de implementação'
+    ],
+    analiseEspecifica: 'Com 4 médicos disponíveis, o SRT foi muito eficiente, resultando no menor tempo médio de espera (400ms). As 7 preempções mostram que o algoritmo dinamicamente otimizou a ordem de atendimento baseado no tempo restante. No entanto, a utilização de 67.2% indica que ter muitos recursos nem sempre resulta em aproveitamento máximo, especialmente quando a demanda é menor que a capacidade.'
   }
+]
 
-  if (algoritmos.includes('prioridade')) {
-    obs.push('Algoritmo de Prioridade favorece processos críticos, mas pode causar starvation')
+// Função para determinar classe CSS baseada no desempenho  
+const obterClasseMetrica = (tipo: string, valor: number): string => {
+  const ranges = {
+    espera: { excelente: 1000, bom: 5000 },
+    execucao: { excelente: 5000, bom: 10000 }, 
+    trocas: { excelente: 3, bom: 8 },
+    utilizacao: { excelente: 90, bom: 70 }
   }
-
-  if (algoritmos.includes('round_robin')) {
-    obs.push('Round Robin oferece fairness, mas pode ter overhead de trocas de contexto')
-  }
-
-  if (numeroMedicos.value > 1) {
-    obs.push(`Com ${numeroMedicos.value} médicos, a utilização da CPU tende a ser mais balanceada`)
-  }
-
-  return obs
-})
-
-const recomendacoes = computed(() => {
-  if (!resultados.value) return []
-
-  const rec = []
-
-  if (melhorEspera.value.nome === 'Shortest Job First') {
-    rec.push('Use SJF quando souber a duração dos processos antecipadamente')
-  }
-
-  if (melhorCPU.value.valor < 80) {
-    rec.push('Considere aumentar o número de núcleos para melhor utilização')
-  }
-
-  if (numeroMedicos.value === 1) {
-    rec.push('Teste com múltiplos núcleos para verificar melhorias no desempenho')
-  }
-
-  rec.push('Considere o contexto específico da aplicação ao escolher o algoritmo')
-
-  return rec
-})
-
-// Métodos
-const executarComparacao = async () => {
-  if (executando.value) return
-
-  executando.value = true
-  resultados.value = null
-
-  try {
-    const processos = processosAtivos.value as IProcesso[]
-    resultados.value = await compararAlgoritmos(processos, numeroMedicos.value, quantum.value)
-  } catch (error) {
-    console.error('Erro na comparação:', error)
-    alert('Erro ao executar comparação. Verifique o console para mais detalhes.')
-  } finally {
-    executando.value = false
-  }
-}
-
-const limparResultados = () => {
-  resultados.value = null
-}
-
-const formatarNomeAlgoritmo = (algoritmo: string): string => {
-  const nomes: Record<string, string> = {
-    round_robin: 'Round Robin',
-    shortest_job_first: 'Shortest Job First',
-    shortest_remaining_time: 'Shortest Remaining Time',
-    prioridade: 'Prioridade'
-  }
-  return nomes[algoritmo] || algoritmo
-}
-
-const obterIconeAlgoritmo = (algoritmo: string): string => {
-  const icones: Record<string, string> = {
-    round_robin: '🔄',
-    shortest_job_first: '⚡',
-    shortest_remaining_time: '🔄',
-    prioridade: '⭐'
-  }
-  return icones[algoritmo] || '📊'
-}
-
-const obterClasseMetrica = (metrica: string, algoritmo: string): string => {
-  if (!resultados.value) return ''
-
-  const valores = Object.values(resultados.value)
-  const valorAtual = resultados.value[algoritmo].metricas
-
-  let valor: number
-  let isMinMelhor = true
-
-  switch (metrica) {
-    case 'espera':
-      valor = valorAtual.tempoMedioEspera
-      break
-    case 'turnaround':
-      valor = valorAtual.tempoMedioTurnaround
-      break
-    case 'trocas':
-      valor = valorAtual.numeroTrocasContexto
-      break
-    case 'cpu':
-      valor = valorAtual.utilizacaoMediaCPU
-      isMinMelhor = false
-      break
-    default:
-      return ''
-  }
-
-  const todosValores = valores.map(r => {
-    switch (metrica) {
-      case 'espera': return r.metricas.tempoMedioEspera
-      case 'turnaround': return r.metricas.tempoMedioTurnaround
-      case 'trocas': return r.metricas.numeroTrocasContexto
-      case 'cpu': return r.metricas.utilizacaoMediaCPU
-      default: return 0
-    }
-  })
-
-  const melhorValor = isMinMelhor ? Math.min(...todosValores) : Math.max(...todosValores)
-  const piorValor = isMinMelhor ? Math.max(...todosValores) : Math.min(...todosValores)
-
-  if (valor === melhorValor) {
-    return 'bg-green-100 text-green-800'
-  } else if (valor === piorValor) {
-    return 'bg-red-100 text-red-800'
+  
+  const range = ranges[tipo as keyof typeof ranges]
+  if (!range) return 'px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium'
+  
+  let classe = 'px-3 py-1 rounded-full text-sm font-medium '
+  
+  if (tipo === 'utilizacao') {
+    if (valor >= range.excelente) classe += 'bg-green-100 text-green-800'
+    else if (valor >= range.bom) classe += 'bg-yellow-100 text-yellow-800' 
+    else classe += 'bg-red-100 text-red-800'
   } else {
-    return 'bg-yellow-100 text-yellow-800'
+    if (valor <= range.excelente) classe += 'bg-green-100 text-green-800'
+    else if (valor <= range.bom) classe += 'bg-yellow-100 text-yellow-800'
+    else classe += 'bg-red-100 text-red-800'
   }
+  
+  return classe
 }
 </script>
