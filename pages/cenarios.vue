@@ -428,6 +428,46 @@
             </div>
           </div>
 
+          <!-- Indicadores de Desempenho -->
+          <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 mb-4">
+            <h6 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              📈 Indicadores de Desempenho
+              <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                {{ cenario.nome }}
+              </span>
+            </h6>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-blue-600">
+                  {{ Math.round((resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.tempoMedioEspera || 0) }}ms
+                </div>
+                <div class="text-xs text-gray-600">Tempo Médio de Espera</div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-green-600">
+                  {{ Math.round((resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.tempoMedioTurnaround || 0) }}ms
+                </div>
+                <div class="text-xs text-gray-600">Tempo Médio de Execução</div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-yellow-600">
+                  {{ (resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.numeroTrocasContexto || 0 }}
+                </div>
+                <div class="text-xs text-gray-600">Trocas de Contexto</div>
+              </div>
+              
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm">
+                <div class="text-xl font-bold text-purple-600">
+                  {{ ((resultados?.[cenario.nome] || resultadosSequenciais[cenario.nome])?.metricas?.utilizacaoMediaCPU || 0).toFixed(1) }}%
+                </div>
+                <div class="text-xs text-gray-600">Utilização Média dos Médicos</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Diagrama Final (cópia exata do estado final da simulação) -->
           <div class="bg-white rounded-lg shadow-sm border-l-4 border-l-green-500 p-4">
             <h6 class="font-medium text-gray-800 mb-3 flex items-center gap-2">
